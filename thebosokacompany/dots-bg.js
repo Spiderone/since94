@@ -118,3 +118,4 @@ function animate() {
 
 init();
 animate();
+alert("test");
