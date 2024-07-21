@@ -1,1 +1,1 @@
-Url:
+Url: https://cdn.jsdelivr.net/gh/spiderone/since94@main/thebosokacompany/homepage.js
