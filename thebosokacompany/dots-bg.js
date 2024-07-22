@@ -118,4 +118,4 @@ function animate() {
 
 init();
 animate();
-alert("update gitpage");
+alert("update raw");
