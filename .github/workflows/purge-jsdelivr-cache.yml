@@ -1,0 +1,27 @@
+name: Purge jsDelivr cache
+
+on:
+  push:
+    branches:
+      - main  # or your default branch name
+    paths:
+      - '**/global-s94.js'  # This will trigger the action for any global-s94.js file in any directory
+
+jobs:
+  purge-jsdelivr-cache:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Get changed files
+      id: changed-files
+      uses: jitterbit/get-changed-files@v1
+    
+    - name: Purge jsDelivr cache
+      run: |
+        for file in ${{ steps.changed-files.outputs.all }}; do
+          if [[ $file == *"global-s94.js" ]]; then
+            echo "Purging cache for $file"
+            curl -X POST "https://purge.jsdelivr.net/gh/${{ github.repository }}@${{ github.sha }}/$file"
+          fi
+        done
