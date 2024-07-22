@@ -118,4 +118,4 @@ function animate() {
 
 init();
 animate();
-alert("update");
+alert("update 2");
