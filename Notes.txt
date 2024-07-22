@@ -73,10 +73,10 @@ document.addEventListener('DOMContentLoaded', function() {
     toggle.addEventListener('change', function() {
         if(this.checked) {
             localStorage.setItem('dev', 'true');
-            console.log('Dev mode enabled');
+            console.log('S94 dev mode enabled');
         } else {
             localStorage.setItem('dev', 'false');
-            console.log('Dev mode disabled');
+            console.log('S94 dev mode disabled');
         }
     });
 });

@@ -1,4 +1,4 @@
-console.log("S94 script loaded!");
+console.log("S94 - global-s94.js loaded!");
 
 // Configuration
 const config = {
@@ -18,6 +18,13 @@ const config = {
 (function () {
   const isDev = localStorage.getItem("dev") === "true";
   const page = document.body.getAttribute("data-page");
+
+  if isDev {
+    console.log(`S94 - Dev mode enabled!`);
+  }
+  else {
+    console.log(`S94 - Dev mode disabled!`);
+  }
 
   function loadScript(scriptName) {
     const baseUrl = isDev
