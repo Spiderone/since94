@@ -11,43 +11,28 @@ jobs:
   purge-jsdelivr-cache:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Get changed files
-      id: changed-files
-      uses: tj-actions/changed-files@v35
-    
-    - name: Purge jsDelivr cache
-      id: purge
-      run: |
-        purge_results=()
-        for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-          if [[ $file == *"global-s94.js" ]]; then
-            echo "Purging cache for $file"
-            fullPath="${{ github.repository }}@${{ github.sha }}/$file"
-            encodedPath=$(echo $fullPath | sed 's/\//%2F/g')
-            purgeUrl="https://purge.jsdelivr.net/gh/$encodedPath"
-            response=$(curl -sS -X GET "$purgeUrl")
-            echo "Purge request sent for: $fullPath"
-            echo "Response: $response"
-            if [[ $response == *"\"status\":\"finished\""* || $response == *"\"status\":\"pending\""* ]]; then
-              purge_results+=("Purge initiated successfully for $file")
-            else
-              purge_results+=("Purge may have failed for $file")
-            fi
-          fi
-        done
-        
-        echo "PURGE_RESULTS<<EOF" >> $GITHUB_OUTPUT
-        printf '%s\n' "${purge_results[@]}" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+    - uses: actions/checkout@v4
 
-    - name: Check purge results
+    - name: Purge jsDelivr cache
       run: |
-        echo "${{ steps.purge.outputs.PURGE_RESULTS }}"
-        if [[ "${{ steps.purge.outputs.PURGE_RESULTS }}" == *"may have failed"* ]]; then
-          echo "Some purge operations may have not completed immediately. This is normal, as purges can take time to propagate."
-          echo "Please check https://www.jsdelivr.com/tools/purge to verify the status manually."
+        file="thebosokacompany/global-s94.js"
+        echo "Purging cache for $file"
+        purgeUrl="https://purge.jsdelivr.net/gh/${{ github.repository }}@main/$file"
+        response=$(curl -sS -X GET "$purgeUrl")
+        echo "Purge request sent for: $purgeUrl"
+        echo "Response: $response"
+        
+        if [[ $response == *"\"status\":\"finished\""* || $response == *"\"status\":\"pending\""* ]]; then
+          echo "Purge initiated successfully for $file"
         else
-          echo "All purge operations were initiated successfully."
+          echo "Purge may have failed for $file. Please check manually."
+          exit 1
         fi
+
+    - name: Verify file content
+      run: |
+        sleep 30  # Wait for 30 seconds
+        content=$(curl -sS "https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/thebosokacompany/global-s94.js")
+        echo "Current file content:"
+        echo "$content"
+        echo "If the content doesn't look updated, please check manually at https://www.jsdelivr.com/tools/purge"
