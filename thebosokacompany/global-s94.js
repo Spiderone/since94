@@ -5,10 +5,10 @@ const config = {
   githubUsername: "Spiderone",
   githubRepo: "Since94",
   githubBranch: "main",
-  githubFolder: "thebosokacompany"
+  githubFolder: "thebosokacompany",
   sandboxId: "2xt84w-2222",
   scripts: {
-    global: [], //For scripts accross all pages
+    global: [], //For scripts across all pages
     devdots: ["dots-bg.js"],
     // Add more pages and their specific scripts as needed
   },
@@ -20,9 +20,9 @@ const config = {
   const page = document.body.getAttribute("data-page");
 
   if (isDev) {
+    // Corrected: Added parentheses
     console.log(`S94 - Dev mode enabled!`);
-  }
-  else {
+  } else {
     console.log(`S94 - Dev mode disabled!`);
   }
 
@@ -44,7 +44,7 @@ const config = {
   if (config.scripts[page]) {
     config.scripts[page].forEach(loadScript);
   }
-  console.log('S94 - Global scripts loaded:', config.scripts.global);
-  console.log('S94 - Local scripts loaded:', config.scripts[page]);
-  console.log('S94 - Page:', page);
+  console.log("S94 - Global scripts loaded:", config.scripts.global);
+  console.log("S94 - Local scripts loaded:", config.scripts[page]);
+  console.log("S94 - Page:", page);
 })();
