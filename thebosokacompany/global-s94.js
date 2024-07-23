@@ -14,9 +14,19 @@ const config = {
 };
 
 // Script loading logic
-(function () {
+function initializeS94() {
   const isDev = localStorage.getItem("dev") === "true";
-  const page = document.body.getAttribute("data-page") || "default";
+  let page = "default";
+
+  try {
+    if (document.body) {
+      page = document.body.getAttribute("data-page") || "default";
+    } else {
+      console.warn("S94 - document.body not found, using default page");
+    }
+  } catch (error) {
+    console.error("S94 - Error getting data-page attribute:", error);
+  }
 
   console.log(`S94 - ${isDev ? "Dev mode enabled!" : "Dev mode disabled!"}`);
 
@@ -55,4 +65,11 @@ const config = {
   }
 
   console.log("S94 - Page:", page);
-})();
+}
+
+// Ensure the DOM is loaded before running the script
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeS94);
+} else {
+  initializeS94();
+}
