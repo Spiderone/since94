@@ -22,9 +22,11 @@ jobs:
         echo "Purge request sent for: $purgeUrl"
         echo "Response: $response"
         
-        if [[ $response == *"\"status\":\"finished\""* ]]; then
+        status=$(echo $response | jq -r '.status')
+        
+        if [ "$status" = "finished" ]; then
           echo "Purge completed successfully for $file"
-        elif [[ $response == *"\"status\":\"pending\""* ]]; then
+        elif [ "$status" = "pending" ]; then
           echo "Purge initiated and pending for $file"
         else
           echo "Purge may have failed for $file. Please check manually."
