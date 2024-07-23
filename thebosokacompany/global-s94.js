@@ -1,4 +1,6 @@
-console.log("S94 - global-s94.js loaded!");
+console.log(
+  "S94 - global-s94.js loaded! Follow instructions below for dev mode",
+);
 
 // Config
 const config = {
