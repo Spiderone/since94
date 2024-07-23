@@ -24,7 +24,15 @@ jobs:
             echo "Purging cache for $file"
             fullPath="${{ github.repository }}@${{ github.sha }}/$file"
             encodedPath=$(echo $fullPath | sed 's/\//%2F/g')
-            curl -X POST "https://purge.jsdelivr.net/gh/$encodedPath"
-            echo "Purge request sent for: $fullPath" >> $GITHUB_OUTPUT
+            purgeUrl="https://purge.jsdelivr.net/gh/$encodedPath"
+            response=$(curl -sS -X GET "$purgeUrl")
+            echo "Purge request sent for: $fullPath"
+            echo "Response: $response"
+            if [[ $response == *"success\":true"* ]]; then
+              echo "Purge successful for $file" >> $GITHUB_OUTPUT
+            else
+              echo "Purge failed for $file" >> $GITHUB_OUTPUT
+              exit 1
+            fi
           fi
         done
