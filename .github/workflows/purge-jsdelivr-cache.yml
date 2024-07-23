@@ -22,10 +22,13 @@ jobs:
         echo "Purge request sent for: $purgeUrl"
         echo "Response: $response"
         
-        if [[ $response == *"\"status\":\"finished\""* || $response == *"\"status\":\"pending\""* ]]; then
-          echo "Purge initiated successfully for $file"
+        if [[ $response == *"\"status\":\"finished\""* ]]; then
+          echo "Purge completed successfully for $file"
+        elif [[ $response == *"\"status\":\"pending\""* ]]; then
+          echo "Purge initiated and pending for $file"
         else
           echo "Purge may have failed for $file. Please check manually."
+          echo "Full response: $response"
           exit 1
         fi
 
