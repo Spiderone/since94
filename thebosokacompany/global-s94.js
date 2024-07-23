@@ -1,6 +1,6 @@
 console.log("S94 - global-s94.js loaded!");
 
-// Config to set
+// Configuration
 const config = {
   githubUsername: "Spiderone",
   githubRepo: "since94",
@@ -17,21 +17,21 @@ const config = {
 // Script loading logic
 (function () {
   const isDev = localStorage.getItem("dev") === "true";
-  const page = document.body.getAttribute("data-page") || "default";
+  const page = document.body.getAttribute("data-page");
 
   if (isDev) {
+    // Corrected: Added parentheses
     console.log(`S94 - Dev mode enabled!`);
   } else {
     console.log(`S94 - Dev mode disabled!`);
   }
 
   function loadScript(scriptName) {
-    const timestamp = new Date().getTime(); // Generate a unique timestamp
     const baseUrl = isDev
       ? `https://${config.sandboxId}.csb.app/`
       : `https://cdn.jsdelivr.net/gh/${config.githubUsername}/${config.githubRepo}@${config.githubBranch}/${config.githubFolder}/`;
     const script = document.createElement("script");
-    script.src = `${baseUrl}${scriptName}?t=${timestamp}`; // Append the timestamp as a query parameter
+    script.src = baseUrl + scriptName;
     document.body.appendChild(script);
   }
 
@@ -41,10 +41,9 @@ const config = {
   }
 
   // Load page-specific scripts
-  if (config.scripts[page] && Array.isArray(config.scripts[page])) {
+  if (config.scripts[page]) {
     config.scripts[page].forEach(loadScript);
   }
-
   console.log("S94 - Global scripts loaded:", config.scripts.global);
   console.log("S94 - Local scripts loaded:", config.scripts[page]);
   console.log("S94 - Page:", page);
