@@ -26,7 +26,8 @@ const config = {
       : `https://since94.s3.eu-west-3.amazonaws.com/site-system/${config.githubFolder}/`;
     const script = document.createElement("script");
     script.src = baseUrl + scriptName;
-    script.onerror = () => console.error(`Failed to load script: ${scriptName}`);
+    script.onerror = () =>
+      console.error(`Failed to load script: ${scriptName}`);
     document.body.appendChild(script);
   }
 
@@ -53,4 +54,5 @@ const config = {
     console.error("S94 - Error loading scripts:", error);
   }
 
-  console.log("S94 - Page:", pa
+  console.log("S94 - Page:", page);
+})();
