@@ -3,7 +3,7 @@ console.log("S94 - global-s94.js loaded!");
 // Config
 const config = {
   githubUsername: "Spiderone",
-  githubFolder: "thebosokacompany",
+  folderName: "thebosokacompany",
   sandboxId: "2xt84w-2222",
   scripts: {
     global: ["global.js"], //For scripts across all pages
@@ -44,8 +44,8 @@ function initializeS94() {
 
   function loadScript(scriptName) {
     const baseUrl = isDev
-      ? `https://${config.sandboxId}.csb.app/`
-      : `https://since94.s3.eu-west-3.amazonaws.com/site-system/${config.githubFolder}/`;
+      ? `https://${config.sandboxId}.csb.app/${config.folderName}/`
+      : `https://since94.s3.eu-west-3.amazonaws.com/site-system/${config.folderName}/`;
     const script = document.createElement("script");
     script.src = baseUrl + scriptName;
     script.onerror = () =>
