@@ -8,6 +8,7 @@ const config = {
   scripts: {
     global: [], //For scripts across all pages
     devdots: ["dots-bg.js"],
+    default: [], // Scripts to load if no matching page is found
     // Add more pages and their specific scripts as needed
   },
 };
@@ -15,14 +16,9 @@ const config = {
 // Script loading logic
 (function () {
   const isDev = localStorage.getItem("dev") === "true";
-  const page = document.body.getAttribute("data-page");
+  const page = document.body.getAttribute("data-page") || "default";
 
-  if (isDev) {
-    // Corrected: Added parentheses
-    console.log(`S94 - Dev mode enabled!`);
-  } else {
-    console.log(`S94 - Dev mode disabled!`);
-  }
+  console.log(`S94 - ${isDev ? "Dev mode enabled!" : "Dev mode disabled!"}`);
 
   function loadScript(scriptName) {
     const baseUrl = isDev
@@ -30,19 +26,31 @@ const config = {
       : `https://since94.s3.eu-west-3.amazonaws.com/site-system/${config.githubFolder}/`;
     const script = document.createElement("script");
     script.src = baseUrl + scriptName;
+    script.onerror = () => console.error(`Failed to load script: ${scriptName}`);
     document.body.appendChild(script);
   }
 
-  // Load global scripts if they exist
-  if (config.scripts.global && Array.isArray(config.scripts.global)) {
-    config.scripts.global.forEach(loadScript);
+  try {
+    // Load global scripts if they exist
+    if (Array.isArray(config.scripts.global)) {
+      config.scripts.global.forEach(loadScript);
+      console.log("S94 - Global scripts loaded:", config.scripts.global);
+    }
+
+    // Load page-specific scripts
+    if (Array.isArray(config.scripts[page])) {
+      config.scripts[page].forEach(loadScript);
+      console.log("S94 - Page-specific scripts loaded:", config.scripts[page]);
+    } else {
+      console.warn(`S94 - No scripts found for page: ${page}`);
+      // Load default scripts if no page-specific scripts are found
+      if (Array.isArray(config.scripts.default)) {
+        config.scripts.default.forEach(loadScript);
+        console.log("S94 - Default scripts loaded:", config.scripts.default);
+      }
+    }
+  } catch (error) {
+    console.error("S94 - Error loading scripts:", error);
   }
 
-  // Load page-specific scripts
-  if (config.scripts[page]) {
-    config.scripts[page].forEach(loadScript);
-  }
-  console.log("S94 - Global scripts loaded:", config.scripts.global);
-  console.log("S94 - Local scripts loaded:", config.scripts[page]);
-  console.log("S94 - Page:", page);
-})();
+  console.log("S94 - Page:", pa
