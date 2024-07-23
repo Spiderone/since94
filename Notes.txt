@@ -1,6 +1,7 @@
 Yaml (purge-jsdelivr-cache): whenever a global-s94.js file is edited within the repo, its cache is purged.
 
 Load global-s94.js in <head> from github URL
+<script src="https://github.com/Spiderone/Since94/main/thebosokacompany/global-s94.js"></script>
 
 Add a hidden page with a switch containing the following code
 
