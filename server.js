@@ -1,7 +1,11 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
+const cors = require("cors");
+
 const app = express();
+app.use(cors());
+
 const port = process.env.PORT || 3000;
 
 // Serve static files from the root directory
@@ -21,9 +25,9 @@ app.get("/list-directories", (req, res) => {
   });
 });
 
-// Catch-all route to handle single-page applications (if needed)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+// Handle 404 errors
+app.use((req, res) => {
+  res.status(404).send("404 - Not Found");
 });
 
 app.listen(port, () => {

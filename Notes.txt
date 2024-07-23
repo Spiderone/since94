@@ -1,4 +1,4 @@
-Yaml (purge-jsdelivr-cache): whenever a global-s94.js file is edited within the repo, its cache is purged to push latest version live.
+Type "npm start" in terminal to start the public server delivering files from devbox
 
 Load global-s94.js in <head> of Webflow from jsdelivr URL, with a timestamp to refresh to latest version
 <script src="https://since94.s3.eu-west-3.amazonaws.com/site-system/githubFolderToReplace/global-s94.js">
