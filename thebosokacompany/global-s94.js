@@ -3,7 +3,7 @@ console.log("S94 - global-s94.js loaded!");
 // Configuration
 const config = {
   githubUsername: "Spiderone",
-  githubRepo: "Since94",
+  githubRepo: "since94",
   githubBranch: "main",
   githubFolder: "thebosokacompany",
   sandboxId: "2xt84w-2222",
