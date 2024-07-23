@@ -1,4 +1,4 @@
-name: Purge jsDelivr cache
+name: Purge jsDelivr cache and verify
 
 on:
   push:
@@ -8,10 +8,15 @@ on:
       - '**/global-s94.js'
 
 jobs:
-  purge-jsdelivr-cache:
+  purge-and-verify:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
+    - name: Get file hash before purge
+      run: |
+        BEFORE_HASH=$(curl -sS "https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/thebosokacompany/global-s94.js" | md5sum | cut -d' ' -f1)
+        echo "BEFORE_HASH=$BEFORE_HASH" >> $GITHUB_ENV
 
     - name: Purge jsDelivr cache
       run: |
@@ -24,20 +29,30 @@ jobs:
         
         status=$(echo $response | jq -r '.status')
         
-        if [ "$status" = "finished" ]; then
-          echo "Purge completed successfully for $file"
-        elif [ "$status" = "pending" ]; then
-          echo "Purge initiated and pending for $file"
+        if [ "$status" = "finished" ] || [ "$status" = "pending" ]; then
+          echo "Purge initiated for $file"
         else
           echo "Purge may have failed for $file. Please check manually."
           echo "Full response: $response"
           exit 1
         fi
 
-    - name: Verify file content
+    - name: Wait and verify
       run: |
-        sleep 30  # Wait for 30 seconds
-        content=$(curl -sS "https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/thebosokacompany/global-s94.js")
-        echo "Current file content:"
-        echo "$content"
-        echo "If the content doesn't look updated, please check manually at https://www.jsdelivr.com/tools/purge"
+        for i in {1..10}; do
+          sleep 30
+          AFTER_HASH=$(curl -sS "https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/thebosokacompany/global-s94.js" | md5sum | cut -d' ' -f1)
+          echo "Attempt $i: Before hash: $BEFORE_HASH, After hash: $AFTER_HASH"
+          if [ "$BEFORE_HASH" != "$AFTER_HASH" ]; then
+            echo "Content has changed. Purge successful."
+            exit 0
+          fi
+        done
+        echo "Content did not change after 5 minutes. Purge may not have propagated yet."
+        exit 1
+
+    - name: Final content check
+      if: failure()
+      run: |
+        echo "Final content check:"
+        curl -sS "https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/thebosokacompany/global-s94.js"
