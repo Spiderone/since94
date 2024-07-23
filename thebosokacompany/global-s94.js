@@ -6,7 +6,7 @@ console.log(
 const config = {
   githubUsername: "Spiderone",
   folderName: "thebosokacompany",
-  sandboxId: "2xt84w-2222",
+  sandboxId: "xygvvh-3000",
   scripts: {
     global: ["global.js"], //For scripts across all pages
     devdots: ["dots-bg.js"],
