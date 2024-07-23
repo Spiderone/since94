@@ -1,5 +1,4 @@
 console.log("S94 - global-s94.js loaded!");
-alert('Update pushed');
 
 // Config
 const config = {
