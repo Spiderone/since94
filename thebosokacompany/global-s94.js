@@ -6,7 +6,7 @@ const config = {
   githubFolder: "thebosokacompany",
   sandboxId: "2xt84w-2222",
   scripts: {
-    global: [global.js], //For scripts across all pages
+    global: ["global.js"], //For scripts across all pages
     devdots: ["dots-bg.js"],
     default: [], // Scripts to load if no matching page is found
     // Add more pages and their specific scripts as needed
