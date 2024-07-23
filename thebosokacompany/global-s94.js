@@ -17,7 +17,7 @@ const config = {
 // Script loading logic
 (function () {
   const isDev = localStorage.getItem("dev") === "true";
-  const page = document.body.getAttribute("data-page");
+  const page = document.body.getAttribute("data-page") || "default";
 
   if (isDev) {
     console.log(`S94 - Dev mode enabled!`);
@@ -41,9 +41,10 @@ const config = {
   }
 
   // Load page-specific scripts
-  if (config.scripts[page]) {
+  if (config.scripts[page] && Array.isArray(config.scripts[page])) {
     config.scripts[page].forEach(loadScript);
   }
+
   console.log("S94 - Global scripts loaded:", config.scripts.global);
   console.log("S94 - Local scripts loaded:", config.scripts[page]);
   console.log("S94 - Page:", page);
