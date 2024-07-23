@@ -1,6 +1,6 @@
 console.log("S94 - global-s94.js loaded!");
 
-// Configuration
+// Configuration v50
 const config = {
   githubUsername: "Spiderone",
   githubRepo: "since94",
