@@ -1,0 +1,29 @@
+name: Deploy to S3 site-system
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-3
+
+    - name: Deploy to S3 site-system
+      run: |
+        # Sync the entire repository to the site-system folder
+        aws s3 sync . s3://since94/site-system --delete --exclude ".git/*" --exclude ".github/*" --exclude "node_modules/*"
+
+    - name: Invalidate CloudFront (if using)
+      run: |
+        aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/site-system/*"
+      if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID != '' }}

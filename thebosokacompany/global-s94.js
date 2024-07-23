@@ -1,10 +1,8 @@
 console.log("S94 - global-s94.js loaded!");
 
-// Configuration v50
+// Config
 const config = {
   githubUsername: "Spiderone",
-  githubRepo: "since94",
-  githubBranch: "main",
   githubFolder: "thebosokacompany",
   sandboxId: "2xt84w-2222",
   scripts: {
@@ -29,7 +27,7 @@ const config = {
   function loadScript(scriptName) {
     const baseUrl = isDev
       ? `https://${config.sandboxId}.csb.app/`
-      : `https://cdn.jsdelivr.net/gh/${config.githubUsername}/${config.githubRepo}@${config.githubBranch}/${config.githubFolder}/`;
+      : `https://since94.s3.eu-west-3.amazonaws.com/site-system/${config.githubFolder}/`;
     const script = document.createElement("script");
     script.src = baseUrl + scriptName;
     document.body.appendChild(script);
