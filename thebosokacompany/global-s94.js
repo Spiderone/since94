@@ -20,18 +20,18 @@ const config = {
   const page = document.body.getAttribute("data-page");
 
   if (isDev) {
-    // Corrected: Added parentheses
     console.log(`S94 - Dev mode enabled!`);
   } else {
     console.log(`S94 - Dev mode disabled!`);
   }
 
   function loadScript(scriptName) {
+    const timestamp = new Date().getTime(); // Generate a unique timestamp
     const baseUrl = isDev
       ? `https://${config.sandboxId}.csb.app/`
       : `https://cdn.jsdelivr.net/gh/${config.githubUsername}/${config.githubRepo}@${config.githubBranch}/${config.githubFolder}/`;
     const script = document.createElement("script");
-    script.src = baseUrl + scriptName;
+    script.src = `${baseUrl}${scriptName}?t=${timestamp}`; // Append the timestamp as a query parameter
     document.body.appendChild(script);
   }
 
