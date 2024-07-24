@@ -1,3 +1,5 @@
+console.log("Hello from dots-bg.js");
+
 let scene, camera, renderer, plane;
 let mouseX = 0,
   mouseY = 0;

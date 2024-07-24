@@ -1,1 +1,1 @@
-console.log("Hello, World from global.js");
+console.log("Hello from global.js");
