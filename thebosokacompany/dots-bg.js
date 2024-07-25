@@ -1,13 +1,14 @@
-import * as THREE from "three";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.166.1/three.module.min.js";
 
 window.onload = function () {
   const dotsBg = document.getElementById("dotsBg");
-  let scene, camera, renderer, particles, bloomComposer;
+  let scene, camera, renderer, particles;
   let mouseX = 0,
     mouseY = 0;
+  let lastMouseX = 0,
+    lastMouseY = 0;
+  let targetMouseX = 0,
+    targetMouseY = 0;
 
   function init() {
     scene = new THREE.Scene();
@@ -46,6 +47,8 @@ window.onload = function () {
       uniforms: {
         color: { value: new THREE.Color(0xffffff) },
         mousePos: { value: new THREE.Vector2() },
+        prevMousePos: { value: new THREE.Vector2() },
+        mouseVelocity: { value: new THREE.Vector2() },
         resolution: {
           value: new THREE.Vector2(window.innerWidth, window.innerHeight),
         },
@@ -53,6 +56,8 @@ window.onload = function () {
       },
       vertexShader: `
         uniform vec2 mousePos;
+        uniform vec2 prevMousePos;
+        uniform vec2 mouseVelocity;
         uniform vec2 resolution;
         uniform float time;
 
@@ -96,11 +101,27 @@ window.onload = function () {
           vec2 aspectCorrectedDiff = (centeredPos - mouseNorm) * vec2(aspect, 1.0);
           float dist = length(aspectCorrectedDiff) * 2.0;
           
-          // Immediate wave effect
-          float waveStrength = 0.02;
-          float wave = exp(-dist * 5.0) * waveStrength;
+          // Softer wave propagation (doubled strength)
+          float waveStrength = length(mouseVelocity) * 0.001;
+          float wave = exp(-dist * 3.0) * waveStrength;
           vec2 waveDir = normalize(aspectCorrectedDiff);
-          vec2 offset = waveDir * wave;
+          
+          // Gentler ripple effect
+          float rippleSpeed = 1.0;
+          float rippleFreq = 5.0;
+          float ripple = sin(dist * rippleFreq - time * rippleSpeed) * 0.5 + 0.5;
+          ripple *= exp(-dist * 2.0) * 0.1; // Doubled ripple intensity
+          
+          // Combine wave and ripple effects
+          vec2 offset = waveDir * (wave + ripple);
+          
+          // Smoother inertia
+          vec2 prevMouseNorm = prevMousePos / resolution;
+          vec2 prevAspectCorrectedDiff = (centeredPos - prevMouseNorm) * vec2(aspect, 1.0);
+          float prevDist = length(prevAspectCorrectedDiff) * 2.0;
+          vec2 prevOffset = normalize(prevAspectCorrectedDiff) * exp(-prevDist * 3.0) * waveStrength;
+          
+          offset = mix(prevOffset, offset, 0.2); // Faster inertia
           
           // Add subtle ambient movement
           float noiseScale = 0.5;
@@ -111,11 +132,11 @@ window.onload = function () {
           
           vec3 pos = vec3(screenPos + offset, 0.0);
           
-          // Brightness variation
-          vAlpha = 0.3 + smoothstep(0.2, 0.0, dist) * 0.7;
+          // Subtle brightness variation
+          vAlpha = 0.3 + smoothstep(0.4, 0.0, dist) * 0.4;
           
           gl_Position = vec4(pos, 1.0);
-          gl_PointSize = 1.6875; // 75% of 2.25
+          gl_PointSize = 2.25;
         }
       `,
       fragmentShader: `
@@ -136,18 +157,6 @@ window.onload = function () {
     particles = new THREE.Points(geometry, material);
     scene.add(particles);
 
-    // Set up bloom effect
-    const renderScene = new RenderPass(scene, camera);
-    const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.5, // bloom strength
-      0.4, // bloom radius
-      0.85, // bloom threshold
-    );
-    bloomComposer = new EffectComposer(renderer);
-    bloomComposer.addPass(renderScene);
-    bloomComposer.addPass(bloomPass);
-
     window.addEventListener("resize", onWindowResize, false);
     document.addEventListener("mousemove", onMouseMove, false);
   }
@@ -156,7 +165,6 @@ window.onload = function () {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    bloomComposer.setSize(window.innerWidth, window.innerHeight);
     particles.material.uniforms.resolution.value.set(
       window.innerWidth,
       window.innerHeight,
@@ -165,22 +173,40 @@ window.onload = function () {
   }
 
   function onMouseMove(event) {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
+    targetMouseX = event.clientX;
+    targetMouseY = event.clientY;
   }
 
   function animate(currentTime) {
     requestAnimationFrame(animate);
 
+    const deltaTime = currentTime - (animate.lastTime || 0);
+    animate.lastTime = currentTime;
+
+    // Smoother mouse movement
+    mouseX += (targetMouseX - mouseX) * 0.1; // Increased from 0.05 to 0.1
+    mouseY += (targetMouseY - mouseY) * 0.1; // Increased from 0.05 to 0.1
+
     const uniforms = particles.material.uniforms;
 
-    // Update mouse position
+    // Update previous mouse position
+    uniforms.prevMousePos.value.copy(uniforms.mousePos.value);
+
+    // Update current mouse position
     uniforms.mousePos.value.set(mouseX, window.innerHeight - mouseY);
 
-    // Update time uniform
-    uniforms.time.value = currentTime * 0.001;
+    // Calculate and update mouse velocity (reduced intensity)
+    const velocityX = (mouseX - lastMouseX) / (deltaTime * 0.1);
+    const velocityY = (mouseY - lastMouseY) / (deltaTime * 0.1);
+    uniforms.mouseVelocity.value.set(velocityX, -velocityY);
 
-    bloomComposer.render();
+    // Update time uniform
+    uniforms.time.value += deltaTime * 0.001;
+
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
+
+    renderer.render(scene, camera);
   }
 
   init();

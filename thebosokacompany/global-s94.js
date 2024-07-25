@@ -1,13 +1,14 @@
 console.log("S94 - global-s94.js loaded! Instructions below for dev mode");
 
 // Config
+// Tip change type by adding type like [{ name: "dots-bg.js", type: "module" }], to an object
 const config = {
   folderName: "thebosokacompany", // Project or site name
   sandboxId: "xygvvh-3000", //Codesandbox
   scripts: {
     global: ["global.js"], // For scripts across all pages
     default: [], // Scripts to load if no matching page is found
-    devdots: [{ name: "dots-bg.js", type: "module" }],
+    devdots: [{ name: "dots-bg.js", type: "module" }], [{ name: "overlay-fluid.js", type: "module" }]
   },
 };
 
