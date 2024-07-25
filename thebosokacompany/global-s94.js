@@ -2,14 +2,12 @@ console.log("S94 - global-s94.js loaded! Instructions below for dev mode");
 
 // Config
 const config = {
-  githubUsername: "Spiderone",
-  folderName: "thebosokacompany",
-  sandboxId: "xygvvh-3000",
+  folderName: "thebosokacompany", // Project or site name
+  sandboxId: "xygvvh-3000", //Codesandbox
   scripts: {
-    global: ["global.js"], //For scripts across all pages
-    devdots: ["dots-bg.js"],
+    global: ["global.js"], // For scripts across all pages
     default: [], // Scripts to load if no matching page is found
-    // Add more pages and their specific scripts as needed
+    devdots: [{ name: "dots-bg.js", type: "module" }],
   },
 };
 
@@ -42,12 +40,23 @@ function initializeS94() {
 
   console.log(`S94 - ${isDev ? "Dev mode enabled!" : "Dev mode disabled!"}`);
 
-  function loadScript(scriptName) {
+  function loadScript(scriptConfig) {
     const baseUrl = isDev
       ? `https://${config.sandboxId}.csb.app/${config.folderName}/`
       : `https://since94.s3.eu-west-3.amazonaws.com/site-system/${config.folderName}/`;
+
+    let scriptName, scriptType;
+    if (typeof scriptConfig === "string") {
+      scriptName = scriptConfig;
+      scriptType = "text/javascript";
+    } else {
+      scriptName = scriptConfig.name;
+      scriptType = scriptConfig.type || "text/javascript";
+    }
+
     const script = document.createElement("script");
     script.src = baseUrl + scriptName;
+    script.type = scriptType;
     script.onerror = () =>
       console.error(`Failed to load script: ${scriptName}`);
     document.body.appendChild(script);
@@ -76,13 +85,13 @@ function initializeS94() {
     console.error("S94 - Error loading scripts:", error);
   }
 
-  console.log("S94 - Page:", page);
+  console.log("S94 - Current page ID is:", page);
 
   // Display dev mode instructions
-  console.log("%cDev Mode Controls:", "font-size: 14px; font-weight: bold;");
-  console.log("To toggle dev mode, type: toggleDevMode()");
-  console.log("To enable dev mode, type: toggleDevMode(true)");
-  console.log("To disable dev mode, type: toggleDevMode(false)");
+  console.log(
+    "%cS94 Dev Mode Controls: toggleDevMode(), toggleDevMode(true), toggleDevMode(false)",
+    "font-size: 14px; font-weight: bold;",
+  );
 }
 
 // Ensure the DOM is loaded before running the script
