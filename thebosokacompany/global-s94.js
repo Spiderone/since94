@@ -8,10 +8,7 @@ const config = {
   scripts: {
     global: ["global.js"], // For scripts across all pages
     default: [], // Scripts to load if no matching page is found
-    devdots: [
-      { name: "dots-bg.js", type: "module" },
-      { name: "overlay-fluid.js", type: "module" },
-    ],
+    devdots: [{ name: "dots-bg.js", type: "module" }],
   },
 };
 
