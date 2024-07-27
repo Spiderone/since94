@@ -77,6 +77,7 @@ function initializeS94() {
         "S94 - Page-specific scripts loaded:",
         config.scripts[page],
       );
+      console.table(config.scripts);
     } else {
       console.warn(`S94 - No scripts found for page: ${page}`);
       // Load default scripts if no page-specific scripts are found
