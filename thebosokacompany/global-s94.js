@@ -6,7 +6,7 @@ const config = {
   folderName: "thebosokacompany", // Project or site name
   sandboxId: "xygvvh-3000", //Codesandbox
   scripts: {
-    global: ["global.js"], // For scripts across all pages
+    global: [], // For scripts across all pages
     default: [], // Scripts to load if no matching page is found
     home: [{ name: "dots-bg.js", type: "module" }],
   },
