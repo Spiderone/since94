@@ -12,7 +12,17 @@ window.onload = function () {
 
   function init() {
     scene = new THREE.Scene();
-    camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
+
+    const aspect = window.innerWidth / window.innerHeight;
+    const frustumSize = 2;
+    camera = new THREE.OrthographicCamera(
+      (frustumSize * aspect) / -2,
+      (frustumSize * aspect) / 2,
+      frustumSize / 2,
+      frustumSize / -2,
+      0.1,
+      1000,
+    );
     camera.position.z = 1;
 
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -24,6 +34,8 @@ window.onload = function () {
 
     window.addEventListener("resize", onWindowResize, false);
     document.addEventListener("mousemove", onMouseMove, false);
+
+    animate(0);
   }
 
   function createParticles() {
@@ -47,7 +59,8 @@ window.onload = function () {
 
     const material = new THREE.ShaderMaterial({
       uniforms: {
-        color: { value: new THREE.Color(0xffffff) },
+        baseColor: { value: new THREE.Color(0xffffff) },
+        highlightColor: { value: new THREE.Color(0xdbffbe) },
         mousePos: { value: new THREE.Vector2() },
         prevMousePos: { value: new THREE.Vector2() },
         mouseVelocity: { value: new THREE.Vector2() },
@@ -55,7 +68,6 @@ window.onload = function () {
           value: new THREE.Vector2(window.innerWidth, window.innerHeight),
         },
         time: { value: 0 },
-        bloomColor: { value: new THREE.Color(0xe7ffd4) },
       },
       vertexShader: `
         uniform vec2 mousePos;
@@ -66,37 +78,6 @@ window.onload = function () {
 
         varying float vAlpha;
         varying float vDist;
-        varying float vBloom;
-
-        // Simplex 2D noise
-        vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
-
-        float snoise(vec2 v){
-          const vec4 C = vec4(0.211324865405187, 0.366025403784439,
-                   -0.577350269189626, 0.024390243902439);
-          vec2 i  = floor(v + dot(v, C.yy) );
-          vec2 x0 = v -   i + dot(i, C.xx);
-          vec2 i1;
-          i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-          vec4 x12 = x0.xyxy + C.xxzz;
-          x12.xy -= i1;
-          i = mod(i, 289.0);
-          vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
-          + i.x + vec3(0.0, i1.x, 1.0 ));
-          vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
-            dot(x12.zw,x12.zw)), 0.0);
-          m = m*m ;
-          m = m*m ;
-          vec3 x = 2.0 * fract(p * C.www) - 1.0;
-          vec3 h = abs(x) - 0.5;
-          vec3 ox = floor(x + 0.5);
-          vec3 a0 = x - ox;
-          m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
-          vec3 g;
-          g.x  = a0.x  * x0.x  + h.x  * x0.y;
-          g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-          return 130.0 * dot(m, g);
-        }
 
         void main() {
           vec2 screenPos = position.xy;
@@ -106,7 +87,7 @@ window.onload = function () {
           vec2 aspectCorrectedDiff = (centeredPos - mouseNorm) * vec2(aspect, 1.0);
           float dist = length(aspectCorrectedDiff) * 2.0;
           
-          // Enlarged cursor circle (1.5x)
+          // Enlarged cursor circle
           float circleRadius = 1.5;
           dist /= circleRadius;
           
@@ -118,49 +99,43 @@ window.onload = function () {
           
           vec2 offset = repulsionDir * repulsion;
           
-          // Add stronger but slower ambient movement
-          float noiseScale = 0.25;
-          float noiseTime = time * 0.05;
-          vec2 noiseCoord = screenPos * noiseScale + noiseTime;
-          float noise = snoise(noiseCoord) * 0.005;
-          offset += vec2(noise, noise);
-          
           vec3 pos = vec3(screenPos + offset, 0.0);
           
-          // Subtle brightness variation (slightly less bright)
+          // Brightness variation
           vAlpha = 0.15 + smoothstep(0.4, 0.0, dist) * 0.3;
           
           vDist = dist;
           
-          // Bloom effect
-          vBloom = smoothstep(0.4, 0.0, dist) * 0.5;
-          
           gl_Position = vec4(pos, 1.0);
-          gl_PointSize = 2.25;
+          gl_PointSize = 2.8125; // 1.25 times larger than original
         }
       `,
       fragmentShader: `
-        uniform vec3 color;
-        uniform vec3 bloomColor;
+        uniform vec3 baseColor;
+        uniform vec3 highlightColor;
         varying float vAlpha;
         varying float vDist;
-        varying float vBloom;
 
         void main() {
           vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-          if (dot(circCoord, circCoord) > 1.0) {
+          float r = length(circCoord);
+          
+          if (r > 1.0) {
             discard;
           }
           
-          // Increased blur effect for dots outside the cursor circle
-          float blur = smoothstep(1.0, 1.2, vDist) * 0.08;
-          vec2 blurredCoord = circCoord * (1.0 - blur);
-          float alpha = smoothstep(1.0, 0.6, length(blurredCoord));
+          // Core dot
+          float coreAlpha = smoothstep(1.0, 0.8, r);
           
-          // Bloom effect
-          vec3 finalColor = mix(color, bloomColor, vBloom);
+          // Glow effect
+          float glowStrength = smoothstep(0.4, 0.0, vDist) * 0.5;
+          float glowAlpha = smoothstep(1.0, 0.0, r) * glowStrength;
           
-          gl_FragColor = vec4(finalColor, vAlpha * alpha);
+          // Combine core and glow
+          vec3 finalColor = mix(baseColor, highlightColor, glowStrength);
+          float finalAlpha = max(coreAlpha, glowAlpha) * vAlpha;
+          
+          gl_FragColor = vec4(finalColor, finalAlpha);
         }
       `,
       transparent: true,
@@ -172,11 +147,14 @@ window.onload = function () {
   }
 
   function onWindowResize() {
-    camera.left = -1;
-    camera.right = 1;
-    camera.top = 1;
-    camera.bottom = -1;
+    const aspect = window.innerWidth / window.innerHeight;
+    const frustumSize = 2;
+    camera.left = (-frustumSize * aspect) / 2;
+    camera.right = (frustumSize * aspect) / 2;
+    camera.top = frustumSize / 2;
+    camera.bottom = -frustumSize / 2;
     camera.updateProjectionMatrix();
+
     renderer.setSize(window.innerWidth, window.innerHeight);
     particles.material.uniforms.resolution.value.set(
       window.innerWidth,
@@ -195,6 +173,8 @@ window.onload = function () {
 
   function animate(currentTime) {
     requestAnimationFrame(animate);
+
+    if (!particles || !particles.material) return;
 
     const deltaTime = currentTime - (animate.lastTime || 0);
     animate.lastTime = currentTime;
@@ -226,5 +206,4 @@ window.onload = function () {
   }
 
   init();
-  animate(0);
 };
