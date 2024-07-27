@@ -67,7 +67,7 @@ function initializeS94() {
     // Load global scripts if they exist
     if (Array.isArray(config.scripts.global)) {
       config.scripts.global.forEach(loadScript);
-      console.log("S94 - Global scripts loaded:", config.scripts.global);
+      console.table("S94 - Global scripts loaded:", config.scripts.global);
     }
 
     // Load page-specific scripts

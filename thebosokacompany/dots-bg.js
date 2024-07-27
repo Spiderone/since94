@@ -20,28 +20,30 @@ window.onload = function () {
     renderer.setPixelRatio(window.devicePixelRatio);
     dotsBg.appendChild(renderer.domElement);
 
+    createParticles();
+
+    window.addEventListener("resize", onWindowResize, false);
+    document.addEventListener("mousemove", onMouseMove, false);
+  }
+
+  function createParticles() {
     const geometry = new THREE.BufferGeometry();
     const spacing = 30; // Spacing between dots
 
-    function createGrid() {
-      const vertices = [];
-      const cols = Math.floor(window.innerWidth / spacing);
-      const rows = Math.floor(window.innerHeight / spacing);
+    const vertices = [];
+    const cols = Math.floor(window.innerWidth / spacing);
+    const rows = Math.floor(window.innerHeight / spacing);
 
-      for (let i = 0; i <= cols; i++) {
-        for (let j = 0; j <= rows; j++) {
-          vertices.push((i / cols) * 2 - 1, (j / rows) * 2 - 1, 0);
-        }
+    for (let i = 0; i <= cols; i++) {
+      for (let j = 0; j <= rows; j++) {
+        vertices.push((i / cols) * 2 - 1, (j / rows) * 2 - 1, 0);
       }
-
-      geometry.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(vertices, 3),
-      );
-      geometry.attributes.position.needsUpdate = true;
     }
 
-    createGrid();
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(vertices, 3),
+    );
 
     const material = new THREE.ShaderMaterial({
       uniforms: {
@@ -53,6 +55,7 @@ window.onload = function () {
           value: new THREE.Vector2(window.innerWidth, window.innerHeight),
         },
         time: { value: 0 },
+        bloomColor: { value: new THREE.Color(0xe7ffd4) },
       },
       vertexShader: `
         uniform vec2 mousePos;
@@ -62,6 +65,8 @@ window.onload = function () {
         uniform float time;
 
         varying float vAlpha;
+        varying float vDist;
+        varying float vBloom;
 
         // Simplex 2D noise
         vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
@@ -101,39 +106,34 @@ window.onload = function () {
           vec2 aspectCorrectedDiff = (centeredPos - mouseNorm) * vec2(aspect, 1.0);
           float dist = length(aspectCorrectedDiff) * 2.0;
           
-          // Softer wave propagation (doubled strength)
-          float waveStrength = length(mouseVelocity) * 0.001;
-          float wave = exp(-dist * 3.0) * waveStrength;
-          vec2 waveDir = normalize(aspectCorrectedDiff);
+          // Enlarged cursor circle (1.5x)
+          float circleRadius = 1.5;
+          dist /= circleRadius;
           
-          // Gentler ripple effect
-          float rippleSpeed = 1.0;
-          float rippleFreq = 5.0;
-          float ripple = sin(dist * rippleFreq - time * rippleSpeed) * 0.5 + 0.5;
-          ripple *= exp(-dist * 2.0) * 0.1; // Doubled ripple intensity
+          // Increased stable repulsion effect based on mouse speed
+          float mouseSpeed = length(mouseVelocity);
+          float repulsionStrength = mouseSpeed * 0.03;
+          float repulsion = exp(-dist * 2.0) * repulsionStrength;
+          vec2 repulsionDir = normalize(aspectCorrectedDiff);
           
-          // Combine wave and ripple effects
-          vec2 offset = waveDir * (wave + ripple);
+          vec2 offset = repulsionDir * repulsion;
           
-          // Smoother inertia
-          vec2 prevMouseNorm = prevMousePos / resolution;
-          vec2 prevAspectCorrectedDiff = (centeredPos - prevMouseNorm) * vec2(aspect, 1.0);
-          float prevDist = length(prevAspectCorrectedDiff) * 2.0;
-          vec2 prevOffset = normalize(prevAspectCorrectedDiff) * exp(-prevDist * 3.0) * waveStrength;
-          
-          offset = mix(prevOffset, offset, 0.2); // Faster inertia
-          
-          // Add subtle ambient movement
-          float noiseScale = 0.5;
-          float noiseTime = time * 0.2;
+          // Add stronger but slower ambient movement
+          float noiseScale = 0.25;
+          float noiseTime = time * 0.05;
           vec2 noiseCoord = screenPos * noiseScale + noiseTime;
           float noise = snoise(noiseCoord) * 0.005;
           offset += vec2(noise, noise);
           
           vec3 pos = vec3(screenPos + offset, 0.0);
           
-          // Subtle brightness variation
-          vAlpha = 0.3 + smoothstep(0.4, 0.0, dist) * 0.4;
+          // Subtle brightness variation (slightly less bright)
+          vAlpha = 0.15 + smoothstep(0.4, 0.0, dist) * 0.3;
+          
+          vDist = dist;
+          
+          // Bloom effect
+          vBloom = smoothstep(0.4, 0.0, dist) * 0.5;
           
           gl_Position = vec4(pos, 1.0);
           gl_PointSize = 2.25;
@@ -141,13 +141,26 @@ window.onload = function () {
       `,
       fragmentShader: `
         uniform vec3 color;
+        uniform vec3 bloomColor;
         varying float vAlpha;
+        varying float vDist;
+        varying float vBloom;
+
         void main() {
           vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
           if (dot(circCoord, circCoord) > 1.0) {
             discard;
           }
-          gl_FragColor = vec4(color, vAlpha);
+          
+          // Increased blur effect for dots outside the cursor circle
+          float blur = smoothstep(1.0, 1.2, vDist) * 0.08;
+          vec2 blurredCoord = circCoord * (1.0 - blur);
+          float alpha = smoothstep(1.0, 0.6, length(blurredCoord));
+          
+          // Bloom effect
+          vec3 finalColor = mix(color, bloomColor, vBloom);
+          
+          gl_FragColor = vec4(finalColor, vAlpha * alpha);
         }
       `,
       transparent: true,
@@ -156,20 +169,23 @@ window.onload = function () {
 
     particles = new THREE.Points(geometry, material);
     scene.add(particles);
-
-    window.addEventListener("resize", onWindowResize, false);
-    document.addEventListener("mousemove", onMouseMove, false);
   }
 
   function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.left = -1;
+    camera.right = 1;
+    camera.top = 1;
+    camera.bottom = -1;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     particles.material.uniforms.resolution.value.set(
       window.innerWidth,
       window.innerHeight,
     );
-    init(); // Recreate the grid on resize
+
+    // Recreate particles
+    scene.remove(particles);
+    createParticles();
   }
 
   function onMouseMove(event) {
@@ -183,9 +199,9 @@ window.onload = function () {
     const deltaTime = currentTime - (animate.lastTime || 0);
     animate.lastTime = currentTime;
 
-    // Smoother mouse movement
-    mouseX += (targetMouseX - mouseX) * 0.1; // Increased from 0.05 to 0.1
-    mouseY += (targetMouseY - mouseY) * 0.1; // Increased from 0.05 to 0.1
+    // Slower mouse movement
+    mouseX += (targetMouseX - mouseX) * 0.05;
+    mouseY += (targetMouseY - mouseY) * 0.05;
 
     const uniforms = particles.material.uniforms;
 
@@ -195,9 +211,9 @@ window.onload = function () {
     // Update current mouse position
     uniforms.mousePos.value.set(mouseX, window.innerHeight - mouseY);
 
-    // Calculate and update mouse velocity (reduced intensity)
-    const velocityX = (mouseX - lastMouseX) / (deltaTime * 0.1);
-    const velocityY = (mouseY - lastMouseY) / (deltaTime * 0.1);
+    // Calculate and update mouse velocity
+    const velocityX = (mouseX - lastMouseX) / deltaTime;
+    const velocityY = (mouseY - lastMouseY) / deltaTime;
     uniforms.mouseVelocity.value.set(velocityX, -velocityY);
 
     // Update time uniform
