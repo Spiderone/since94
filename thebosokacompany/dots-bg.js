@@ -125,10 +125,10 @@ window.onload = function () {
           }
           
           // Core dot
-          float coreAlpha = smoothstep(1.0, 0.8, r);
+          float coreAlpha = smoothstep(1.0, 0.01, r);
           
           // Glow effect
-          float glowStrength = smoothstep(0.4, 0.0, vDist) * 0.5;
+          float glowStrength = smoothstep(0.8, 0.0, vDist) * 0.5;
           float glowAlpha = smoothstep(1.0, 0.0, r) * glowStrength;
           
           // Combine core and glow

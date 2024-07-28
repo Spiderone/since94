@@ -1,4 +1,4 @@
-console.log("S94 - global-s94.js loaded! Instructions below for dev mode");
+console.log("S94 - global-s94.js loaded!");
 
 // Config
 // Change type by adding type like [{ name: "dots-bg.js", type: "module" }], to an object
@@ -39,7 +39,7 @@ function initializeS94() {
     console.error("S94 - Error getting data-page attribute:", error);
   }
 
-  console.log(`S94 - ${isDev ? "Dev mode enabled!" : "Dev mode disabled!"}`);
+  console.log(`S94 - ${isDev ? "🛠️ Dev mode enabled!" : "🚀 You're in prod!"}`);
 
   function loadScript(scriptConfig) {
     const baseUrl = isDev
