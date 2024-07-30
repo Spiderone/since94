@@ -8,7 +8,7 @@ const config = {
   scripts: {
     global: [], // For scripts across all pages
     default: [], // Scripts to load if no matching page is found
-    home: [{ name: "dots-bg.js", type: "module" }],
+    home: [{ name: "dots-bg.js", type: "module" } {name:"txt-anims.js"}],
   },
 };
 

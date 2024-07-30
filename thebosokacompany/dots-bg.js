@@ -9,6 +9,7 @@ window.onload = function () {
     lastMouseY = 0;
   let targetMouseX = 0,
     targetMouseY = 0;
+  let animationStartTime;
 
   function init() {
     scene = new THREE.Scene();
@@ -35,16 +36,18 @@ window.onload = function () {
     window.addEventListener("resize", onWindowResize, false);
     document.addEventListener("mousemove", onMouseMove, false);
 
+    animationStartTime = Date.now();
     animate(0);
   }
 
   function createParticles() {
     const geometry = new THREE.BufferGeometry();
-    const spacing = 30; // Spacing between dots
+    const finalSpacing = 30; // Final spacing between dots
+    const initialSpacing = 60; // Initial spacing between dots (more spread out)
 
     const vertices = [];
-    const cols = Math.floor(window.innerWidth / spacing);
-    const rows = Math.floor(window.innerHeight / spacing);
+    const cols = Math.floor(window.innerWidth / finalSpacing);
+    const rows = Math.floor(window.innerHeight / finalSpacing);
 
     for (let i = 0; i <= cols; i++) {
       for (let j = 0; j <= rows; j++) {
@@ -68,6 +71,7 @@ window.onload = function () {
           value: new THREE.Vector2(window.innerWidth, window.innerHeight),
         },
         time: { value: 0 },
+        animationProgress: { value: 0 }, // Uniform for animation progress
       },
       vertexShader: `
         uniform vec2 mousePos;
@@ -75,12 +79,24 @@ window.onload = function () {
         uniform vec2 mouseVelocity;
         uniform vec2 resolution;
         uniform float time;
+        uniform float animationProgress;
 
         varying float vAlpha;
         varying float vDist;
 
+        // Easing function (ease-out cubic)
+        float easeOutCubic(float t) {
+          return 1.0 - pow(1.0 - t, 3.0);
+        }
+
         void main() {
           vec2 screenPos = position.xy;
+          
+          // Apply eased animation to screenPos
+          float easedProgress = easeOutCubic(animationProgress);
+          float spreadFactor = 1.0 + (1.0 - easedProgress) * 1.0; // Adjust the 1.0 to control spread amount
+          screenPos *= spreadFactor;
+          
           vec2 mouseNorm = mousePos / resolution;
           float aspect = resolution.x / resolution.y;
           vec2 centeredPos = (screenPos + 1.0) * 0.5;
@@ -101,13 +117,17 @@ window.onload = function () {
           
           vec3 pos = vec3(screenPos + offset, 0.0);
           
-          // Brightness variation
-          vAlpha = 0.15 + smoothstep(0.4, 0.0, dist) * 0.3;
+          // Animate brightness and size
+          float sizeMultiplier = 1.0 + (1.0 - easedProgress) * 1.0; // Double size at start
+          float alphaMultiplier = 1.0 + (1.0 - easedProgress) * 1.0; // Double opacity at start
+          
+          // Brightness variation with animation
+          vAlpha = (0.15 + smoothstep(0.4, 0.0, dist) * 0.3) * 1.10 * alphaMultiplier;
           
           vDist = dist;
           
           gl_Position = vec4(pos, 1.0);
-          gl_PointSize = 2.8125; // 1.25 times larger than original
+          gl_PointSize = 3.234375 * sizeMultiplier; // Animate size
         }
       `,
       fragmentShader: `
@@ -164,6 +184,7 @@ window.onload = function () {
     // Recreate particles
     scene.remove(particles);
     createParticles();
+    animationStartTime = Date.now(); // Reset animation start time
   }
 
   function onMouseMove(event) {
@@ -178,6 +199,12 @@ window.onload = function () {
 
     const deltaTime = currentTime - (animate.lastTime || 0);
     animate.lastTime = currentTime;
+
+    // Calculate animation progress with easing
+    const animationDuration = 1500; // Animation duration in milliseconds (increased to 1.5 seconds)
+    const elapsedTime = Date.now() - animationStartTime;
+    const animationProgress = Math.min(elapsedTime / animationDuration, 1);
+    particles.material.uniforms.animationProgress.value = animationProgress;
 
     // Slower mouse movement
     mouseX += (targetMouseX - mouseX) * 0.05;
