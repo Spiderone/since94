@@ -1,6 +1,6 @@
 import SplitType from "https://unpkg.com/split-type";
-import gsap from "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js";
-import ScrollTrigger from "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js";
+import { gsap } from "https://since94.s3.eu-west-3.amazonaws.com/site-system/pushed_modules/gsap/dist/gsap.min.js";
+import { ScrollTrigger } from "https://since94.s3.eu-west-3.amazonaws.com/site-system/pushed_modules/gsap/ScrollTrigger.js";
 
 console.log("txt-anims.js module loaded");
 
