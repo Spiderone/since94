@@ -20,7 +20,7 @@ jobs:
 
     - name: Deploy to S3 site-system
       run: |
-        aws s3 sync . s3://since94/site-system --delete --exclude ".git/*" --exclude ".github/*" --exclude "node_modules/*"
+        aws s3 sync . s3://since94/site-system --delete
 
     - name: Invalidate CloudFront (if distribution ID is set)
       if: env.CLOUDFRONT_DISTRIBUTION_ID != ''

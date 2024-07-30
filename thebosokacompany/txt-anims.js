@@ -1,8 +1,11 @@
-import SplitType from "https://unpkg.com/split-type@0.3.3/dist/split-type.es.min.js";
-import { gsap } from "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js";
-import { ScrollTrigger } from "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js";
+import SplitType from "https://unpkg.com/split-type";
+import gsap from "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js";
+import ScrollTrigger from "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js";
 
 console.log("txt-anims.js module loaded");
+
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
 
 function initTextAnimations() {
   console.log("Initializing text animations");
@@ -45,3 +48,6 @@ function initTextAnimations() {
 
 // Run initialization immediately
 initTextAnimations();
+
+// Export the function if you need to use it in other modules
+export { initTextAnimations };
