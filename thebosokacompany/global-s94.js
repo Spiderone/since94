@@ -104,8 +104,10 @@ function initializeS94() {
       // Load page-specific scripts
       if (Array.isArray(config.scripts[page])) {
         await loadScripts(config.scripts[page]);
-        console.log("S94 - Page-specific scripts loaded:");
-        console.table(config.scripts[page]);
+        console.log(
+          "S94 - Page-specific scripts loaded:",
+          config.scripts[page],
+        );
       } else {
         console.warn(`S94 - No scripts found for page: ${page}`);
         // Load default scripts if no page-specific scripts are found

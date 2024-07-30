@@ -40,8 +40,6 @@ function initializeAnimations() {
       onEnter: () => tl.play(),
     });
   });
-
-  // Rest of your animation code...
 }
 
 // Run initialization when the script loads
