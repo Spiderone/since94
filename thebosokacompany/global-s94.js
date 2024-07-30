@@ -4,11 +4,11 @@ console.log("S94 - global-s94.js loaded!");
 // Change type by adding type like [{ name: "dots-bg.js", type: "module" }], to an object
 const config = {
   folderName: "thebosokacompany", // Project or site name
-  sandboxId: "xygvvh-3000", //Codesandbox
+  sandboxId: "xygvvh-3000", // Codesandbox
   scripts: {
     global: [], // For scripts across all pages
     default: [], // Scripts to load if no matching page is found
-    home: [{ name: "dots-bg.js", type: "module" } {name:"txt-anims.js"}],
+    home: [{ name: "dots-bg.js", type: "module" }, { name: "txt-anims.js" }],
   },
 };
 
