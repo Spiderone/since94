@@ -5,7 +5,11 @@ const config = {
   folderName: "thebosokacompany",
   sandboxId: "xygvvh-3000",
   scripts: {
-    global: [],
+    global: [
+      { name: "pushed_modules/gsap/gsap.min.js" },
+      { name: "pushed_modules/gsap/ScrollTrigger.min.js" },
+      { name: "pushed_modules/split-type/index.min.js" },
+    ],
     default: [],
     home: [
       { name: "dots-bg.js", type: "module" },

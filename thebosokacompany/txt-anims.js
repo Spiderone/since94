@@ -1,16 +1,23 @@
-import SplitType from "https://since94.s3.eu-west-3.amazonaws.com/site-system/pushed_modules/split-type/index.min.js";
-import { gsap } from "https://since94.s3.eu-west-3.amazonaws.com/site-system/pushed_modules/gsap/gsap.min.js";
-import { ScrollTrigger } from "https://since94.s3.eu-west-3.amazonaws.com/site-system/pushed_modules/gsap/ScrollTrigger.js";
+// txt-anims.js
+console.log("txt-anims.js loaded");
 
-console.log("txt-anims.js module loaded");
+function initializeAnimations() {
+  // Check if required libraries are loaded
+  if (
+    typeof gsap === "undefined" ||
+    typeof ScrollTrigger === "undefined" ||
+    typeof SplitType === "undefined"
+  ) {
+    console.error(
+      "Required libraries not loaded. Make sure they are in the global scripts config.",
+    );
+    return;
+  }
 
-// Register ScrollTrigger plugin
-gsap.registerPlugin(ScrollTrigger);
+  // Register ScrollTrigger with GSAP
+  gsap.registerPlugin(ScrollTrigger);
 
-function initTextAnimations() {
-  console.log("Initializing text animations");
-
-  // Split text into spans
+  // Your animation code here
   let typeSplit = new SplitType("[text-split]", {
     types: "words, chars",
     tagName: "span",
@@ -34,20 +41,8 @@ function initTextAnimations() {
     });
   });
 
-  // Avoid flash of unstyled content
-  gsap.set("[text-split]", { opacity: 1 });
-
-  // Handle gradient text effect
-  document.querySelectorAll(".txtgrad").forEach((element) => {
-    const text = element.getAttribute("data-text");
-    element.innerHTML = `<span aria-hidden="true">${text}</span>${text}`;
-  });
-
-  console.log("Text animations initialized");
+  // Rest of your animation code...
 }
 
-// Run initialization immediately
-initTextAnimations();
-
-// Export the function if you need to use it in other modules
-export { initTextAnimations };
+// Run initialization when the script loads
+initializeAnimations();
