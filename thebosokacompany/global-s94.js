@@ -1,13 +1,12 @@
 console.log("S94 - global-s94.js loaded!");
 
 // Config
-// Change type by adding type like [{ name: "dots-bg.js", type: "module" }], to an object
 const config = {
-  folderName: "thebosokacompany", // Project or site name
-  sandboxId: "xygvvh-3000", // Codesandbox
+  folderName: "thebosokacompany",
+  sandboxId: "xygvvh-3000",
   scripts: {
-    global: [], // For scripts across all pages
-    default: [], // Scripts to load if no matching page is found
+    global: [],
+    default: [],
     home: [{ name: "dots-bg.js", type: "module" }, { name: "txt-anims.js" }],
   },
 };
@@ -42,58 +41,75 @@ function initializeS94() {
   console.log(`S94 - ${isDev ? "🛠️ Dev mode enabled!" : "🚀 You're in prod!"}`);
 
   function loadScript(scriptConfig) {
-    const baseUrl = isDev
-      ? `https://${config.sandboxId}.csb.app/${config.folderName}/`
-      : `https://since94.s3.eu-west-3.amazonaws.com/site-system/${config.folderName}/`;
+    return new Promise((resolve, reject) => {
+      const baseUrl = isDev
+        ? `https://${config.sandboxId}.csb.app/${config.folderName}/`
+        : `https://since94.s3.eu-west-3.amazonaws.com/site-system/${config.folderName}/`;
 
-    let scriptName, scriptType;
-    if (typeof scriptConfig === "string") {
-      scriptName = scriptConfig;
-      scriptType = "text/javascript";
-    } else {
-      scriptName = scriptConfig.name;
-      scriptType = scriptConfig.type || "text/javascript";
-    }
-
-    const script = document.createElement("script");
-    script.src = baseUrl + scriptName;
-    script.type = scriptType;
-    script.onerror = () =>
-      console.error(`Failed to load script: ${scriptName}`);
-    document.body.appendChild(script);
-  }
-
-  try {
-    // Load global scripts if they exist
-    if (Array.isArray(config.scripts.global)) {
-      config.scripts.global.forEach(loadScript);
-      console.log("S94 - Global scripts loaded:", config.scripts.global);
-    }
-
-    // Load page-specific scripts
-    if (Array.isArray(config.scripts[page])) {
-      config.scripts[page].forEach(loadScript);
-      console.log("S94 - Page-specific scripts loaded:");
-      console.table(config.scripts[page]);
-    } else {
-      console.warn(`S94 - No scripts found for page: ${page}`);
-      // Load default scripts if no page-specific scripts are found
-      if (Array.isArray(config.scripts.default)) {
-        config.scripts.default.forEach(loadScript);
-        console.log("S94 - Default scripts loaded:", config.scripts.default);
+      let scriptName, scriptType;
+      if (typeof scriptConfig === "string") {
+        scriptName = scriptConfig;
+        scriptType = "text/javascript";
+      } else {
+        scriptName = scriptConfig.name;
+        scriptType = scriptConfig.type || "text/javascript";
       }
-    }
-  } catch (error) {
-    console.error("S94 - Error loading scripts:", error);
+
+      const script = document.createElement("script");
+      script.src = baseUrl + scriptName;
+      script.type = scriptType;
+
+      // Use defer to maintain order while not blocking page load
+      script.defer = true;
+
+      script.onload = resolve;
+      script.onerror = () =>
+        reject(new Error(`Failed to load script: ${scriptName}`));
+      document.body.appendChild(script);
+    });
   }
 
-  console.log("S94 - Current page ID is:", page);
+  async function loadScripts(scripts) {
+    const loadPromises = scripts.map(loadScript);
+    await Promise.all(loadPromises);
+  }
 
-  // Display dev mode instructions
-  console.log(
-    "%cS94 Dev Mode Controls: toggleDevMode(), toggleDevMode(true), toggleDevMode(false)",
-    "font-size: 14px; font-weight: bold;",
-  );
+  async function runScripts() {
+    try {
+      // Load global scripts if they exist
+      if (Array.isArray(config.scripts.global)) {
+        await loadScripts(config.scripts.global);
+        console.log("S94 - Global scripts loaded:", config.scripts.global);
+      }
+
+      // Load page-specific scripts
+      if (Array.isArray(config.scripts[page])) {
+        await loadScripts(config.scripts[page]);
+        console.log("S94 - Page-specific scripts loaded:");
+        console.table(config.scripts[page]);
+      } else {
+        console.warn(`S94 - No scripts found for page: ${page}`);
+        // Load default scripts if no page-specific scripts are found
+        if (Array.isArray(config.scripts.default)) {
+          await loadScripts(config.scripts.default);
+          console.log("S94 - Default scripts loaded:", config.scripts.default);
+        }
+      }
+    } catch (error) {
+      console.error("S94 - Error loading scripts:", error);
+    }
+
+    console.log("S94 - Current page ID is:", page);
+
+    // Display dev mode instructions
+    console.log(
+      "%cS94 Dev Mode Controls: toggleDevMode(), toggleDevMode(true), toggleDevMode(false)",
+      "font-size: 14px; font-weight: bold;",
+    );
+  }
+
+  // Run the script loading process
+  runScripts();
 }
 
 // Ensure the DOM is loaded before running the script
