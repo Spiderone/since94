@@ -106,7 +106,7 @@ function initializeS94() {
         await loadScripts(config.scripts[page]);
         console.log(
           "S94 - Page-specific scripts loaded:",
-          config.scripts[page].name,
+          config.scripts[page],
         );
       } else {
         console.warn(`S94 - No scripts found for page: ${page}`);
