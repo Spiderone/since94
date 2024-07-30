@@ -7,7 +7,10 @@ const config = {
   scripts: {
     global: [],
     default: [],
-    home: [{ name: "dots-bg.js", type: "module" }, { name: "txt-anims.js" }],
+    home: [
+      { name: "dots-bg.js", type: "module" },
+      { name: "txt-anims.js", type: "module" },
+    ],
   },
 };
 
