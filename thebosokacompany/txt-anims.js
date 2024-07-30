@@ -1,4 +1,4 @@
-import SplitType from "https://unpkg.com/split-type";
+import SplitType from "https://since94.s3.eu-west-3.amazonaws.com/site-system/pushed_modules/split-type/index.min.js";
 import { gsap } from "https://since94.s3.eu-west-3.amazonaws.com/site-system/pushed_modules/gsap/gsap.min.js";
 import { ScrollTrigger } from "https://since94.s3.eu-west-3.amazonaws.com/site-system/pushed_modules/gsap/ScrollTrigger.js";
 
