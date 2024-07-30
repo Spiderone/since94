@@ -4,12 +4,13 @@ console.log("S94 - global-s94.js loaded!");
 const config = {
   folderName: "thebosokacompany",
   sandboxId: "xygvvh-3000",
+  dependencies: [
+    "pushed_modules/gsap/gsap.min.js",
+    "pushed_modules/gsap/ScrollTrigger.min.js",
+    "pushed_modules/split-type/index.min.js",
+  ],
   scripts: {
-    global: [
-      { name: "pushed_modules/gsap/gsap.min.js" },
-      { name: "pushed_modules/gsap/ScrollTrigger.min.js" },
-      { name: "pushed_modules/split-type/index.min.js" },
-    ],
+    global: [],
     default: [],
     home: [
       { name: "dots-bg.js", type: "module" },
@@ -49,9 +50,14 @@ function initializeS94() {
 
   function loadScript(scriptConfig) {
     return new Promise((resolve, reject) => {
-      const baseUrl = isDev
-        ? `https://${config.sandboxId}.csb.app/${config.folderName}/`
-        : `https://since94.s3.eu-west-3.amazonaws.com/site-system/${config.folderName}/`;
+      const isDependency = config.dependencies.includes(
+        scriptConfig.name || scriptConfig,
+      );
+      const baseUrl = isDependency
+        ? "https://since94.s3.eu-west-3.amazonaws.com/site-system/"
+        : isDev
+          ? `https://${config.sandboxId}.csb.app/${config.folderName}/`
+          : `https://since94.s3.eu-west-3.amazonaws.com/site-system/${config.folderName}/`;
 
       let scriptName, scriptType;
       if (typeof scriptConfig === "string") {
@@ -83,6 +89,12 @@ function initializeS94() {
 
   async function runScripts() {
     try {
+      // Load dependencies first
+      if (Array.isArray(config.dependencies)) {
+        await loadScripts(config.dependencies);
+        console.log("S94 - Dependencies loaded:", config.dependencies);
+      }
+
       // Load global scripts if they exist
       if (Array.isArray(config.scripts.global)) {
         await loadScripts(config.scripts.global);
