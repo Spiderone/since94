@@ -16,6 +16,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "gsap": "^3.12.5"
+    "gsap": "^3.12.5",
+    "split-type": "^0.3.4"
   }
 }
