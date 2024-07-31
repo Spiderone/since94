@@ -1,13 +1,4 @@
-console.log("
-                                 
-      _/_/_/    _/_/    _/  _/   
-   _/        _/    _/  _/  _/    
-    _/_/      _/_/_/  _/_/_/_/   
-       _/        _/      _/      
-_/_/_/    _/_/_/        _/       
-                                 
-                                 
-");
+console.log("S94 - global-s94.js loaded!");
 
 // Config
 const config = {
