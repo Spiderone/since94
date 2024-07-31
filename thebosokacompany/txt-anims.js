@@ -27,7 +27,7 @@ function initializeAnimations() {
   document.querySelectorAll("[words-slide-up]").forEach(function (element) {
     let tl = gsap.timeline({ paused: true });
     tl.from(element.querySelectorAll(".word"), {
-      opacity: 0,
+      autoAlpha: 0,
       yPercent: 25,
       duration: 0.5,
       ease: "power2.out",
