@@ -14,7 +14,7 @@ const config = {
     default: [],
     home: [
       { name: "dots-bg.js", type: "module" },
-      { name: "txt-anims.js", type: "text/javascript" },
+      { name: "txt-anims.js", type: "module" },
     ],
   },
 };
