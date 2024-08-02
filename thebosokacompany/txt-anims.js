@@ -1,46 +1,45 @@
-// txt-anims.js
-console.log("txt-anims.js loaded");
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SplitType from "split-type";
+
+gsap.registerPlugin(ScrollTrigger);
 
 function initializeAnimations() {
-  // Check if required libraries are loaded
-  if (
-    typeof gsap === "undefined" ||
-    typeof ScrollTrigger === "undefined" ||
-    typeof SplitType === "undefined"
-  ) {
-    console.error(
-      "Required libraries not loaded. Make sure they are in the global scripts config.",
-    );
-    return;
-  }
+  console.log("initializeAnimations function called");
 
-  // Register ScrollTrigger with GSAP
-  gsap.registerPlugin(ScrollTrigger);
-
-  // Your animation code here
   let typeSplit = new SplitType("[text-split]", {
     types: "words, chars",
     tagName: "span",
   });
 
-  // Words slide up animation
-  document.querySelectorAll("[words-slide-up]").forEach(function (element) {
-    let tl = gsap.timeline({ paused: true });
-    tl.from(element.querySelectorAll(".word"), {
+  console.log("SplitType initialized", typeSplit);
+
+  let elements = document.querySelectorAll("[words-slide-up]");
+  console.log("Found elements with [words-slide-up]:", elements.length);
+
+  elements.forEach(function (element, index) {
+    console.log(`Processing element ${index + 1}`);
+    let words = element.querySelectorAll(".word");
+    console.log(`Found ${words.length} words in element ${index + 1}`);
+
+    gsap.from(words, {
       autoAlpha: 0,
       yPercent: 25,
       duration: 0.5,
       ease: "power2.out",
       stagger: { amount: 0.3 },
-    });
-
-    ScrollTrigger.create({
-      trigger: element,
-      start: "top 88%",
-      onEnter: () => tl.play(),
+      scrollTrigger: {
+        trigger: element,
+        start: "top 88%",
+        onEnter: () =>
+          console.log(`Animation triggered for element ${index + 1}`),
+      },
     });
   });
 }
 
-// Run initialization when the script loads
-initializeAnimations();
+// Run initialization when the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", initializeAnimations);
+
+// If you're using a module system that supports default exports:
+export default initializeAnimations;
