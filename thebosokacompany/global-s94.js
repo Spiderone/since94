@@ -9,8 +9,6 @@ const config = {
     "pushed_modules/gsap/ScrollTrigger.min.js",
     "pushed_modules/split-type/index.min.js",
     "pushed_modules/lenis/lenis.min.js",
-    "pushed_modules/blotter/blotter.min.js",
-    "pushed_modules/blotter/liquidDistortMaterial.min.js",
   ],
   scripts: {
     global: [{ name: "lenis-scroll.js" }],
