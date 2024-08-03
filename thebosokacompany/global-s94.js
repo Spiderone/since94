@@ -72,10 +72,10 @@ function initializeS94() {
       script.src = baseUrl + scriptName;
       script.type = scriptType;
 
-      // Use defer to maintain order while not blocking page load
-      script.defer = true;
-
-      script.onload = resolve;
+      script.onload = () => {
+        console.log(`S94 - Loaded script: ${scriptName}`);
+        resolve();
+      };
       script.onerror = () =>
         reject(new Error(`Failed to load script: ${scriptName}`));
       document.body.appendChild(script);
@@ -83,16 +83,28 @@ function initializeS94() {
   }
 
   async function loadScripts(scripts) {
-    const loadPromises = scripts.map(loadScript);
-    await Promise.all(loadPromises);
+    for (const script of scripts) {
+      await loadScript(script);
+    }
   }
 
   async function runScripts() {
     try {
-      // Load dependencies first
+      // Load dependencies first and ensure they're fully loaded
       if (Array.isArray(config.dependencies)) {
         await loadScripts(config.dependencies);
-        console.log("S94 - Dependencies loaded:", config.dependencies);
+        console.log("S94 - All dependencies loaded successfully");
+      }
+
+      // Verify that key dependencies are available
+      if (
+        typeof gsap === "undefined" ||
+        typeof ScrollTrigger === "undefined" ||
+        typeof SplitType === "undefined"
+      ) {
+        throw new Error(
+          "S94 - One or more required dependencies are not available",
+        );
       }
 
       // Load global scripts if they exist
@@ -115,6 +127,14 @@ function initializeS94() {
           await loadScripts(config.scripts.default);
           console.log("S94 - Default scripts loaded:", config.scripts.default);
         }
+      }
+
+      // Initialize animations if the function exists
+      if (typeof window.initializeAnimations === "function") {
+        console.log("S94 - Initializing animations");
+        window.initializeAnimations();
+      } else {
+        console.warn("S94 - initializeAnimations function not found");
       }
     } catch (error) {
       console.error("S94 - Error loading scripts:", error);
