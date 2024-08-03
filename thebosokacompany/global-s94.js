@@ -96,17 +96,6 @@ function initializeS94() {
         console.log("S94 - All dependencies loaded successfully");
       }
 
-      // Verify that key dependencies are available
-      if (
-        typeof gsap === "undefined" ||
-        typeof ScrollTrigger === "undefined" ||
-        typeof SplitType === "undefined"
-      ) {
-        throw new Error(
-          "S94 - One or more required dependencies are not available",
-        );
-      }
-
       // Load global scripts if they exist
       if (Array.isArray(config.scripts.global)) {
         await loadScripts(config.scripts.global);
@@ -127,14 +116,6 @@ function initializeS94() {
           await loadScripts(config.scripts.default);
           console.log("S94 - Default scripts loaded:", config.scripts.default);
         }
-      }
-
-      // Initialize animations if the function exists
-      if (typeof window.initializeAnimations === "function") {
-        console.log("S94 - Initializing animations");
-        window.initializeAnimations();
-      } else {
-        console.warn("S94 - initializeAnimations function not found");
       }
     } catch (error) {
       console.error("S94 - Error loading scripts:", error);
