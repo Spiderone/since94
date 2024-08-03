@@ -1,3 +1,4 @@
+console.log("dots-bg-js loaded");
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.166.1/three.module.min.js";
 
 window.onload = function () {
