@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "blotter": "^2.1.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "gsap": "^3.12.5",

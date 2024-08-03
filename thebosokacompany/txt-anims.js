@@ -57,7 +57,7 @@
   });
 
   // Stagger slide up animation
-  document.querySelectorAll("[stagger-slide-up2]").forEach(function (element) {
+  document.querySelectorAll("[stagger-slide-up]").forEach(function (element) {
     let tl = gsap.timeline({ paused: true });
     tl.from(element.querySelectorAll(".stagger"), {
       anticipatePin: 1,
@@ -71,9 +71,9 @@
   });
 
   // Block slide up animation
-  document.querySelectorAll("[block-slide-up2]").forEach(function (element) {
+  document.querySelectorAll("[block-slide-up]").forEach(function (element) {
     let tl = gsap.timeline({ paused: true });
-    tl.from(element, {
+    tl.from($(this), {
       anticipatePin: 1,
       autoAlpha: 0, // Use autoAlpha to control both opacity and visibility
       y: 25,
@@ -82,6 +82,17 @@
       stagger: { amount: 0.3 },
     });
     createScrollTrigger(element, tl);
+  });
+
+  $("[letters-slide-up]").each(function (index) {
+    let tl = gsap.timeline({ paused: true });
+    tl.from($(this).find(".char"), {
+      yPercent: 100,
+      duration: 0.2,
+      ease: "power1.out",
+      stagger: { amount: 0.6 },
+    });
+    createScrollTrigger($(this), tl);
   });
 
   // Set initial visibility and opacity
@@ -98,7 +109,7 @@
       .to(chars, {
         autoAlpha: 0,
         yPercent: -100,
-        duration: 0.25,
+        duration: 0.15,
         ease: "power2.out",
         stagger: { amount: 0.15 },
       })
@@ -106,7 +117,7 @@
       .to(chars, {
         autoAlpha: 1,
         yPercent: 0,
-        duration: 0.25,
+        duration: 0.15,
         ease: "power2.out",
         stagger: { amount: 0.15 },
       });
@@ -119,6 +130,44 @@
       hoverTl.pause(0);
     });
   }
+
+  function animateGameCard() {
+    const gameCards = document.querySelectorAll(".game-card");
+
+    gameCards.forEach((card) => {
+      const childElements = card.querySelectorAll(
+        ".gc-txtwrap > *:not(.gc-video-wrap *)",
+      );
+
+      let tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: card,
+          start: "top 65%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      tl.from(card, {
+        scale: 0.6,
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.out",
+      }).from(
+        childElements,
+        {
+          x: -50,
+          opacity: 0,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: "power2.out",
+        },
+        "-=0.3",
+      );
+    });
+  }
+
+  // Call the new animation function
+  animateGameCard();
 
   console.log("txt-anims.js animations initialized");
 })();
