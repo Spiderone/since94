@@ -1,5 +1,21 @@
-console.log("txt-anim.js loaded");
-function initializeAnimations() {
+(function () {
+  console.log("txt-anims.js loaded");
+
+  // Ensure GSAP, ScrollTrigger, and SplitType are available
+  if (
+    typeof gsap === "undefined" ||
+    typeof ScrollTrigger === "undefined" ||
+    typeof SplitType === "undefined"
+  ) {
+    console.error(
+      "Required dependencies are not loaded. GSAP, ScrollTrigger, or SplitType is missing.",
+    );
+    return;
+  }
+
+  // Register ScrollTrigger plugin
+  gsap.registerPlugin(ScrollTrigger);
+
   // Split text into spans
   let typeSplit = new SplitType("[text-split]", {
     types: "words, chars",
@@ -26,11 +42,12 @@ function initializeAnimations() {
     });
   }
 
-  document.querySelectorAll("[words-slide-up2]").forEach(function (element) {
+  // Words slide up animation
+  document.querySelectorAll("[words-slide-up]").forEach(function (element) {
     let tl = gsap.timeline({ paused: true });
     tl.from(element.querySelectorAll(".word"), {
       anticipatePin: 1,
-      opacity: 0,
+      autoAlpha: 0, // Use autoAlpha to control both opacity and visibility
       yPercent: 25,
       duration: 0.5,
       ease: "power2.out",
@@ -39,11 +56,69 @@ function initializeAnimations() {
     createScrollTrigger(element, tl);
   });
 
-  // Similar modifications for other animations...
+  // Stagger slide up animation
+  document.querySelectorAll("[stagger-slide-up2]").forEach(function (element) {
+    let tl = gsap.timeline({ paused: true });
+    tl.from(element.querySelectorAll(".stagger"), {
+      anticipatePin: 1,
+      autoAlpha: 0, // Use autoAlpha to control both opacity and visibility
+      yPercent: 25,
+      duration: 0.5,
+      ease: "power2.out",
+      stagger: { amount: 0.3 },
+    });
+    createScrollTrigger(element, tl);
+  });
 
-  // Avoid flash of unstyled content
-  gsap.set("[text-split]", { opacity: 1 });
-}
+  // Block slide up animation
+  document.querySelectorAll("[block-slide-up2]").forEach(function (element) {
+    let tl = gsap.timeline({ paused: true });
+    tl.from(element, {
+      anticipatePin: 1,
+      autoAlpha: 0, // Use autoAlpha to control both opacity and visibility
+      y: 25,
+      duration: 0.5,
+      ease: "power2.out",
+      stagger: { amount: 0.3 },
+    });
+    createScrollTrigger(element, tl);
+  });
 
-// This function should be called after all scripts are loaded
-window.initializeAnimations = initializeAnimations;
+  // Set initial visibility and opacity
+  gsap.set("[text-split]", { autoAlpha: 1 });
+
+  // Hover effect for .char elements within .hero-cta
+  const heroCta = document.querySelector(".hero-cta");
+  if (heroCta) {
+    const chars = heroCta.querySelectorAll(".char");
+
+    let hoverTl = gsap.timeline({ paused: true });
+
+    hoverTl
+      .to(chars, {
+        autoAlpha: 0,
+        yPercent: -100,
+        duration: 0.25,
+        ease: "power2.out",
+        stagger: { amount: 0.15 },
+      })
+      .set(chars, { yPercent: 100 })
+      .to(chars, {
+        autoAlpha: 1,
+        yPercent: 0,
+        duration: 0.25,
+        ease: "power2.out",
+        stagger: { amount: 0.15 },
+      });
+
+    heroCta.addEventListener("mouseenter", () => {
+      hoverTl.restart();
+    });
+
+    heroCta.addEventListener("mouseleave", () => {
+      hoverTl.pause(0);
+    });
+  }
+
+  console.log("txt-anims.js animations initialized");
+})();

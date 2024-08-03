@@ -8,9 +8,10 @@ const config = {
     "pushed_modules/gsap/gsap.min.js",
     "pushed_modules/gsap/ScrollTrigger.min.js",
     "pushed_modules/split-type/index.min.js",
+    "pushed_modules/lenis/lenis.min.js",
   ],
   scripts: {
-    global: [],
+    global: [{ name: "lenis-scroll.js" }],
     default: [],
     home: [
       { name: "dots-bg.js", type: "module" },
