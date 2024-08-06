@@ -169,5 +169,187 @@
   // Call the new animation function
   animateGameCard();
 
+  function animateHeroElements() {
+    // Animate h1 text elements
+    const headings = document.querySelectorAll("h1");
+
+    headings.forEach((heading) => {
+      const textElements = heading.querySelectorAll(".title-word, .txtgrad");
+
+      if (textElements.length > 0) {
+        gsap.from(textElements, {
+          scrollTrigger: {
+            trigger: heading,
+            start: "top 80%",
+            toggleActions: "play none none reverse",
+          },
+          scale: 0.5,
+          opacity: 0,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: "back.out(1.7)",
+        });
+      }
+    });
+
+    // Animate .h-wrap child elements
+    const hWrapChildren = document.querySelector(".h-wrap")?.children;
+    if (hWrapChildren) {
+      gsap.from(hWrapChildren, {
+        scrollTrigger: {
+          trigger: ".h-wrap",
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+        y: 20,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "power2.out",
+      });
+    }
+
+    // Animate .h-subwrap child elements
+    const hSubwrapChildren = document.querySelector(".h-subwrap")?.children;
+    if (hSubwrapChildren) {
+      gsap.from(hSubwrapChildren, {
+        scrollTrigger: {
+          trigger: ".h-subwrap",
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+        y: 20,
+        opacity: 1,
+        duration: 0.1,
+        stagger: 0.1,
+        ease: "power2.out",
+      });
+    }
+  }
+
+  // Call the animation function
+  animateHeroElements();
+
+  function animateTeamCards() {
+    console.log("Initializing team card animations");
+    const teamCardsWrap = document.querySelector(".team-cards-wrap");
+    if (!teamCardsWrap) {
+      console.log("Team cards wrap not found");
+      return;
+    }
+
+    const cards = teamCardsWrap.querySelectorAll(".team-card");
+    console.log(`Found ${cards.length} team cards`);
+
+    gsap.from(cards, {
+      scrollTrigger: {
+        trigger: teamCardsWrap,
+        start: "top 80%",
+        toggleActions: "play none none reverse",
+        onEnter: () => console.log("Team cards animation triggered"),
+      },
+      scale: 0.8,
+      opacity: 0,
+      duration: 0.5,
+      stagger: 0.1, // This creates the stagger effect
+      ease: "back.out(1.5)",
+      onComplete: () => console.log("All cards pop-in animation completed"),
+      onStart: () => console.log("Starting cards animation"),
+    });
+
+    // Animate each card's children
+    cards.forEach((card, index) => {
+      const cardChildren = card.children;
+      gsap.from(cardChildren, {
+        scrollTrigger: {
+          trigger: card,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+        y: 20,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "power2.out",
+        delay: index * 0.2, // This delays each card's children animation
+        onComplete: () =>
+          console.log(`Card ${index + 1} children animation completed`),
+      });
+    });
+  }
+  animateTeamCards();
+
+  function animateContact() {
+    console.log("Initializing contact animation");
+
+    const formBlock = document.querySelector(".form-block");
+    const submitButton = document.querySelector(".submit-button");
+
+    if (formBlock) {
+      console.log("Form block found");
+
+      // Animate the form block and form fields
+      gsap.from(formBlock, {
+        scrollTrigger: {
+          trigger: formBlock,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+          onEnter: () => console.log("Form block ScrollTrigger entered"),
+          onLeaveBack: () => console.log("Form block ScrollTrigger left"),
+        },
+        scale: 0.95,
+        opacity: 0,
+        duration: 0.6,
+        ease: "back.out(1.7)",
+        onStart: () => console.log("Form block animation started"),
+        onComplete: () => console.log("Form block animation completed"),
+      });
+
+      const formFields = formBlock.querySelectorAll(".form-field-wrap");
+      gsap.from(formFields, {
+        scrollTrigger: {
+          trigger: formBlock,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+        scale: 0.9,
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "back.out(1.7)",
+        delay: 0.15,
+        onStart: () => console.log("Form fields animation started"),
+        onComplete: () => console.log("Form fields animation completed"),
+      });
+    } else {
+      console.log("Form block not found");
+    }
+
+    // Animate submit button separately
+    if (submitButton) {
+      console.log("Submit button found");
+      gsap.from(submitButton, {
+        scrollTrigger: {
+          trigger: submitButton,
+          start: "top bottom", // This will trigger the animation as soon as the button enters the viewport from the bottom
+          toggleActions: "play none none none",
+        },
+        scale: 0.8,
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        ease: "back.out(1.7)",
+        onStart: () => console.log("Submit button animation started"),
+        onComplete: () => console.log("Submit button animation completed"),
+      });
+    } else {
+      console.log("Submit button not found");
+    }
+  }
+
+  // Call the animation function
+  animateContact();
+
   console.log("txt-anims.js animations initialized");
 })();
