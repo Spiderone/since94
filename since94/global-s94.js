@@ -2,7 +2,7 @@ console.log("S94 - global-s94.js loaded!");
 
 // Config
 const config = {
-  folderName: "thebosokacompany",
+  folderName: "since94",
   sandboxId: "xygvvh-3000",
   dependencies: [],
   scripts: {

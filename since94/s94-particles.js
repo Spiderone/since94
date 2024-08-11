@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.166.1/three.module.min.js";
 
 // Create scene, camera, and renderer
 const scene = new THREE.Scene();
