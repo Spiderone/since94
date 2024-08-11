@@ -1,120 +1,172 @@
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.166.1/three.module.min.js";
 
-// Create scene, camera, and renderer
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000,
-);
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+function initParticleSystem() {
+  const heroSpacer = document.querySelector(".hero-spacer");
 
-// Create particle system
-const particleCount = 10000;
-const particles = new THREE.BufferGeometry();
-const positions = new Float32Array(particleCount * 3);
-const colors = new Float32Array(particleCount * 3);
+  if (!heroSpacer) {
+    console.error("Could not find .hero-spacer element");
+    return;
+  }
 
-for (let i = 0; i < particleCount * 3; i++) {
-  positions[i] = (Math.random() - 0.5) * 10;
-  colors[i] = 1; // White color
-}
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    heroSpacer.clientWidth / heroSpacer.clientHeight,
+    0.1,
+    1000,
+  );
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(heroSpacer.clientWidth, heroSpacer.clientHeight);
 
-particles.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-particles.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  heroSpacer.innerHTML = "";
+  heroSpacer.appendChild(renderer.domElement);
 
-// Load logo texture
-const textureLoader = new THREE.TextureLoader();
-const logoTexture = textureLoader.load("path/to/your/logo.png", () => {
-  // Once texture is loaded, update particle positions
-  updateParticlePositions();
-});
+  renderer.domElement.style.width = "100%";
+  renderer.domElement.style.height = "100%";
+  renderer.domElement.style.display = "block";
 
-// Create particle material
-const particleMaterial = new THREE.PointsMaterial({
-  size: 0.05,
-  vertexColors: true,
-  transparent: true,
-  opacity: 0.32,
-  map: logoTexture,
-});
+  const loader = new THREE.TextureLoader();
+  loader.load(
+    "https://uploads-ssl.webflow.com/5c4f5c323770f2d68eb62b54/646f3e297f64141352bbe815_s94-white.svg",
+    function (texture) {
+      const particleSystem = createParticleSystem(texture);
+      scene.add(particleSystem);
 
-const particleSystem = new THREE.Points(particles, particleMaterial);
-scene.add(particleSystem);
+      const aspect = 106 / 41;
+      const logoHeight = 2;
+      const logoWidth = logoHeight * aspect;
+      camera.position.z =
+        (logoHeight / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) *
+        0.75;
 
-camera.position.z = 5;
+      animate();
+    },
+  );
 
-// Mouse interaction
-const mouse = new THREE.Vector2();
+  function createParticleSystem(texture) {
+    const imageData = getImageData(texture.image);
+    const geometry = new THREE.BufferGeometry();
+    const particles = [];
+    const opacities = []; // New array to store opacity values
 
-function onMouseMove(event) {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-}
+    const aspect = 106 / 41;
+    const scale = 2;
+    const width = scale * aspect;
+    const height = scale;
 
-window.addEventListener("mousemove", onMouseMove, false);
+    const particleDensity = 1;
+    const depthRange = 0.5; // Range of depth for particles
 
-// Update particle positions based on logo
-function updateParticlePositions() {
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
-  canvas.width = logoTexture.image.width;
-  canvas.height = logoTexture.image.height;
-  context.drawImage(logoTexture.image, 0, 0);
-  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let y = 0; y < imageData.height; y += 1 / particleDensity) {
+      for (let x = 0; x < imageData.width; x += 1 / particleDensity) {
+        if (
+          imageData.data[
+            (Math.floor(y) * imageData.width + Math.floor(x)) * 4 + 3
+          ] > 128
+        ) {
+          const particle = new THREE.Vector3(
+            (x / imageData.width - 0.5) * width,
+            (-y / imageData.height + 0.5) * height,
+            (Math.random() - 0.5) * depthRange, // Random Z position
+          );
+          particles.push(particle);
 
-  const positions = particles.attributes.position.array;
-
-  for (let i = 0; i < particleCount; i++) {
-    const x = Math.floor(Math.random() * canvas.width);
-    const y = Math.floor(Math.random() * canvas.height);
-    const alpha = imageData.data[(y * canvas.width + x) * 4 + 3];
-
-    if (alpha > 0) {
-      positions[i * 3] = (x / canvas.width - 0.5) * 10;
-      positions[i * 3 + 1] = (y / canvas.height - 0.5) * 10;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 2;
+          // Calculate opacity based on Z position
+          const opacity = THREE.MathUtils.mapLinear(
+            particle.z,
+            -depthRange / 2,
+            depthRange / 2,
+            0.1,
+            1,
+          );
+          opacities.push(opacity);
+        }
+      }
     }
+
+    geometry.setFromPoints(particles);
+    geometry.setAttribute(
+      "opacity",
+      new THREE.Float32BufferAttribute(opacities, 1),
+    );
+
+    const material = new THREE.ShaderMaterial({
+      vertexShader: `
+        attribute float opacity;
+        varying float vOpacity;
+        void main() {
+          vOpacity = opacity;
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
+          gl_PointSize = 3.8 / -mvPosition.z;
+        }
+      `,
+      fragmentShader: `
+        varying float vOpacity;
+        void main() {
+          if (length(gl_PointCoord - vec2(0.5)) > 0.5) discard;
+          gl_FragColor = vec4(0.65, 0.65, 0.65, vOpacity + 0.1);
+        }
+      `,
+      transparent: true,
+    });
+
+    return new THREE.Points(geometry, material);
   }
 
-  particles.attributes.position.needsUpdate = true;
-}
-
-// Animation loop
-function animate() {
-  requestAnimationFrame(animate);
-
-  const time = Date.now() * 0.001;
-  const positions = particles.attributes.position.array;
-
-  for (let i = 0; i < particleCount; i++) {
-    const ix = i * 3;
-    const iy = i * 3 + 1;
-    const iz = i * 3 + 2;
-
-    // Add wavy motion
-    positions[iy] += Math.sin(time + positions[ix]) * 0.01;
-
-    // Look towards cursor
-    positions[ix] += (mouse.x - positions[ix]) * 0.01;
-    positions[iy] += (-mouse.y - positions[iy]) * 0.01;
+  function getImageData(image) {
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext("2d");
+    context.drawImage(image, 0, 0);
+    return context.getImageData(0, 0, image.width, image.height);
   }
 
-  particles.attributes.position.needsUpdate = true;
+  function animate() {
+    requestAnimationFrame(animate);
 
-  renderer.render(scene, camera);
+    const time = Date.now() * 0.004;
+
+    scene.children.forEach((child) => {
+      if (child instanceof THREE.Points) {
+        const positions = child.geometry.attributes.position.array;
+        for (let i = 0; i < positions.length; i += 3) {
+          const angle = time + i * 0.0003;
+          const radius = 0.04;
+          positions[i] +=
+            Math.cos(angle) * radius - Math.cos(angle - 0.05) * radius;
+          positions[i + 1] +=
+            Math.sin(angle) * radius - Math.sin(angle - 0.05) * radius;
+
+          // Oscillate Z position
+          positions[i + 2] = Math.sin(angle * 0.5) * 0.08;
+
+          // Update opacity based on new Z position
+          const opacity = THREE.MathUtils.mapLinear(
+            positions[i + 2],
+            -0.1,
+            0.1,
+            0.1,
+            1,
+          );
+          child.geometry.attributes.opacity.array[i / 3] = opacity;
+        }
+        child.geometry.attributes.position.needsUpdate = true;
+        child.geometry.attributes.opacity.needsUpdate = true;
+      }
+    });
+
+    renderer.render(scene, camera);
+  }
+
+  function onWindowResize() {
+    camera.aspect = heroSpacer.clientWidth / heroSpacer.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(heroSpacer.clientWidth, heroSpacer.clientHeight);
+  }
+
+  window.addEventListener("resize", onWindowResize, false);
 }
 
-animate();
-
-// Handle window resize
-window.addEventListener("resize", onWindowResize, false);
-
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
+initParticleSystem();
