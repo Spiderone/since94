@@ -10,7 +10,7 @@ function initParticleSystem() {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(
-    75,
+    90,
     heroSpacer.clientWidth / heroSpacer.clientHeight,
     0.1,
     1000,
@@ -50,12 +50,12 @@ function initParticleSystem() {
     const opacities = []; // New array to store opacity values
 
     const aspect = 106 / 41;
-    const scale = 2;
+    const scale = 2.8;
     const width = scale * aspect;
     const height = scale;
 
-    const particleDensity = 1;
-    const depthRange = 0.5; // Range of depth for particles
+    const particleDensity = 1.2;
+    const depthRange = 0.75; // Range of depth for particles
 
     for (let y = 0; y < imageData.height; y += 1 / particleDensity) {
       for (let x = 0; x < imageData.width; x += 1 / particleDensity) {
@@ -98,7 +98,7 @@ function initParticleSystem() {
           vOpacity = opacity;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           gl_Position = projectionMatrix * mvPosition;
-          gl_PointSize = 3.8 / -mvPosition.z;
+          gl_PointSize = 3.0 / -mvPosition.z;
         }
       `,
       fragmentShader: `
