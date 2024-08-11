@@ -2,6 +2,6 @@ Type "npm start" in terminal to start the public server delivering files from de
 
 Import ES6 modules : copy from node_modules to pushed_modules and serve them from S3 - for example, pushed_modules/gsap/gsap.min.js
 
-Load global-s94.js in <head> of Webflow from jsdelivr URL, with a timestamp to refresh to latest version
+Load global-s94.js in <head> of Webflow from S3 URL
 <script src="https://since94.s3.eu-west-3.amazonaws.com/site-system/githubFolderToReplace/global-s94.js">
 </script>
