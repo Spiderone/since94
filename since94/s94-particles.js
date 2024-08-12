@@ -50,7 +50,7 @@ function initParticleSystem() {
     const opacities = []; // New array to store opacity values
 
     const aspect = 106 / 41;
-    const scale = 2.8;
+    const scale = 1.5;
     const width = scale * aspect;
     const height = scale;
 
@@ -98,7 +98,7 @@ function initParticleSystem() {
           vOpacity = opacity;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           gl_Position = projectionMatrix * mvPosition;
-          gl_PointSize = 3.0 / -mvPosition.z;
+          gl_PointSize = 3.6 / -mvPosition.z;
         }
       `,
       fragmentShader: `
@@ -126,7 +126,7 @@ function initParticleSystem() {
   function animate() {
     requestAnimationFrame(animate);
 
-    const time = Date.now() * 0.004;
+    const time = Date.now() * 0.002;
 
     scene.children.forEach((child) => {
       if (child instanceof THREE.Points) {
@@ -135,12 +135,12 @@ function initParticleSystem() {
           const angle = time + i * 0.0003;
           const radius = 0.04;
           positions[i] +=
-            Math.cos(angle) * radius - Math.cos(angle - 0.05) * radius;
+            Math.cos(angle) * radius - Math.cos(angle - 0.025) * radius;
           positions[i + 1] +=
-            Math.sin(angle) * radius - Math.sin(angle - 0.05) * radius;
+            Math.sin(angle) * radius - Math.sin(angle - 0.025) * radius;
 
           // Oscillate Z position
-          positions[i + 2] = Math.sin(angle * 0.5) * 0.08;
+          positions[i + 2] = Math.sin(angle * 0.5) * 0.06;
 
           // Update opacity based on new Z position
           const opacity = THREE.MathUtils.mapLinear(
