@@ -27,7 +27,7 @@ function initParticleSystem() {
 
   const loader = new THREE.TextureLoader();
   loader.load(
-    "https://uploads-ssl.webflow.com/5c4f5c323770f2d68eb62b54/646f3e297f64141352bbe815_s94-white.svg",
+    "https://uploads-ssl.webflow.com/5c4f5c323770f2d68eb62b54/66b9334ff8f1d06c15bbc5eb_s94-large.avif",
     function (texture) {
       const particleSystem = createParticleSystem(texture);
       scene.add(particleSystem);
@@ -50,11 +50,11 @@ function initParticleSystem() {
     const opacities = []; // New array to store opacity values
 
     const aspect = 106 / 41;
-    const scale = 1.5;
+    const scale = 1.3;
     const width = scale * aspect;
     const height = scale;
 
-    const particleDensity = 1.2;
+    const particleDensity = 0.045;
     const depthRange = 0.75; // Range of depth for particles
 
     for (let y = 0; y < imageData.height; y += 1 / particleDensity) {
@@ -74,9 +74,9 @@ function initParticleSystem() {
           // Calculate opacity based on Z position
           const opacity = THREE.MathUtils.mapLinear(
             particle.z,
-            -depthRange / 2,
-            depthRange / 2,
-            0.1,
+            -depthRange / 1,
+            depthRange / 1,
+            0.01,
             1,
           );
           opacities.push(opacity);
@@ -105,7 +105,7 @@ function initParticleSystem() {
         varying float vOpacity;
         void main() {
           if (length(gl_PointCoord - vec2(0.5)) > 0.5) discard;
-          gl_FragColor = vec4(0.65, 0.65, 0.65, vOpacity + 0.1);
+          gl_FragColor = vec4(0.70, 0.70, 0.70, vOpacity);
         }
       `,
       transparent: true,
@@ -126,21 +126,21 @@ function initParticleSystem() {
   function animate() {
     requestAnimationFrame(animate);
 
-    const time = Date.now() * 0.002;
+    const time = Date.now() * 0.0015;
 
     scene.children.forEach((child) => {
       if (child instanceof THREE.Points) {
         const positions = child.geometry.attributes.position.array;
         for (let i = 0; i < positions.length; i += 3) {
-          const angle = time + i * 0.0003;
-          const radius = 0.04;
+          const angle = time + i * 0.0006;
+          const radius = 0.004;
           positions[i] +=
-            Math.cos(angle) * radius - Math.cos(angle - 0.025) * radius;
+            Math.cos(angle) * radius - Math.cos(angle - 0.03) * radius;
           positions[i + 1] +=
-            Math.sin(angle) * radius - Math.sin(angle - 0.025) * radius;
+            Math.sin(angle) * radius - Math.sin(angle - 0.03) * radius;
 
           // Oscillate Z position
-          positions[i + 2] = Math.sin(angle * 0.5) * 0.06;
+          positions[i + 2] = Math.sin(angle * 1) * 0.025;
 
           // Update opacity based on new Z position
           const opacity = THREE.MathUtils.mapLinear(
