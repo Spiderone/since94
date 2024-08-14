@@ -50,11 +50,11 @@ function initParticleSystem() {
     const opacities = []; // New array to store opacity values
 
     const aspect = 106 / 41;
-    const scale = 1.3;
+    const scale = 1;
     const width = scale * aspect;
     const height = scale;
 
-    const particleDensity = 0.045;
+    const particleDensity = 0.035;
     const depthRange = 0.75; // Range of depth for particles
 
     for (let y = 0; y < imageData.height; y += 1 / particleDensity) {
@@ -98,7 +98,7 @@ function initParticleSystem() {
           vOpacity = opacity;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           gl_Position = projectionMatrix * mvPosition;
-          gl_PointSize = 3.6 / -mvPosition.z;
+          gl_PointSize = 3.65 / -mvPosition.z;
         }
       `,
       fragmentShader: `
