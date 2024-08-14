@@ -50,11 +50,11 @@ function initParticleSystem() {
     const opacities = []; // New array to store opacity values
 
     const aspect = 106 / 41;
-    const scale = 1;
+    const scale = 0.95;
     const width = scale * aspect;
     const height = scale;
 
-    const particleDensity = 0.035;
+    const particleDensity = 0.038;
     const depthRange = 0.75; // Range of depth for particles
 
     for (let y = 0; y < imageData.height; y += 1 / particleDensity) {
